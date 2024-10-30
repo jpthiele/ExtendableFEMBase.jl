@@ -99,7 +99,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 		fill!(IMM_face, 0)
 		fill!(lb, 0)
 
-		QP.item = cell
+		QP.cell = cell
 		QP.region = xCellRegions[cell]
 
 		# quadrature loop
