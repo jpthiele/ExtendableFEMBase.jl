@@ -64,7 +64,12 @@ function main(; maxnref = 8, order = 2, Plotter = nothing)
 		println(stdout, barplot(["Grid", "FaceNodes", "celldofs", "Assembly", "Solve"], [time_grid, time_facenodes, time_dofmap, time_assembly, time_solve], title = "Runtimes"))
 
 		## plot
-		scalarplot!(plt[1,1], xgrid, view(sol.entries, 1:num_nodes(xgrid)), limits = (-0.0125,0.0125))
+		if Plotter !== nothing
+			scalarplot!(plt[1,1], xgrid, view(sol.entries, 1:num_nodes(xgrid)), limits = (-0.0125,0.0125))
+		else
+			sol_grad = continuify(sol[1], Gradient)
+			println(stdout, unicode_scalarplot(sol[1]))
+		end
 	end
 
 	return sol, plt

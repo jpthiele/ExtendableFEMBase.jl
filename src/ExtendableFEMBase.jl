@@ -48,9 +48,6 @@ using Printf: Printf, @printf
 using SparseArrays: SparseArrays, AbstractSparseArray, AbstractSparseMatrix,
 					SparseMatrixCSC, nzrange, rowvals, sparse
 using SpecialPolynomials: SpecialPolynomials, ShiftedLegendre, basis
-using Term: Term, grid
-using UnicodePlots: UnicodePlots, BrailleCanvas, Plot, heatmap, lineplot,
-					lineplot!
 
 include("functionoperators.jl")
 export AbstractFunctionOperator
@@ -122,10 +119,6 @@ export submatrix
 
 export displace_mesh, displace_mesh!
 
-
-include("plots.jl")
-export unicode_gridplot, unicode_scalarplot
-
 include("reconstructionhandlers.jl")
 export ReconstructionHandler, get_rcoefficients!
 
@@ -171,5 +164,12 @@ export PointEvaluator, evaluate!, evaluate_bary!, eval_func, eval_func_bary
 
 include("lazy_interpolate.jl")
 export lazy_interpolate!
+
+
+# ExtendableFEMBaseUnicodePlotsExt extension
+function unicode_gridplot end
+function unicode_scalarplot end
+export unicode_gridplot, unicode_scalarplot
+
 
 end # module ExtendableFEMBase.

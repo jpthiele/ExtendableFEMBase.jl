@@ -1,5 +1,11 @@
+module ExtendableFEMBaseUnicodePlotsExt
 
-import UnicodePlots: lines!
+using ExtendableGrids: ExtendableGrid, simplexgrid, ON_CELLS, ON_FACES, ON_EDGES, CellNodes, CellGeometries, BFaceNodes, BFaceRegions, Coordinates
+using ExtendableFEMBase: FEVector, FEVectorBlock, FESpace, lazy_interpolate!, num_cells, local_celledgenodes, get_ncomponents, H1P1, IdentityComponent, standard_kernel
+using UnicodePlots: UnicodePlots, BrailleCanvas, Plot, heatmap, lineplot,
+					lineplot!, lines!
+
+import ExtendableFEMBase: unicode_gridplot, unicode_scalarplot
 
 """
 ````
@@ -170,7 +176,11 @@ function unicode_scalarplot(
 				title = title * (length(components) == 1 ? "" : "[$(components[c])]"),
 				colormap = colormap,
 			) for c ∈ 1:length(components)
-		]
-		return UnicodePlots.gridplot(map(i -> plts[i], 1:length(components)); layout = (nrows, nothing))
+		] 
+        return length(plts) == 1 ? plts[1] : plts
+        ## the following command looks nicer, but requires the Term-based extension of UnicodePlots
+		## return UnicodePlots.gridplot(map(i -> plts[i], 1:length(components)); layout = (nrows, nothing))
 	end
+end
+
 end

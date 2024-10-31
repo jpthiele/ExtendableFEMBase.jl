@@ -147,7 +147,6 @@ function Base.show(io::IO, FEM::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtot
 		@printf(io, " %s (%s, %s)\n", FEM[j].name, FEM[j].FES.name, FEM[j].FESY.name)
 	end
 	println(io, "\n    nnzvals = $(length(FEM.entries.cscmatrix.nzval))")
-	println(io, "\n$(UnicodePlots.spy(sparse(FEM.entries.cscmatrix)))")
 end
 
 """

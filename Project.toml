@@ -1,7 +1,7 @@
 name = "ExtendableFEMBase"
 uuid = "12fb9182-3d4c-4424-8fd1-727a0899810c"
 authors = ["Christian Merdon <merdon@wias-berlin.de>"]
-version = "0.7.1"
+version = "0.8.0"
 
 [deps]
 DiffResults = "163ba53b-c6d8-5494-b064-1a9d43ac40c5"
@@ -14,8 +14,12 @@ Polynomials = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 SpecialPolynomials = "a25cea48-d430-424a-8ee7-0d3ad3742e9e"
-Term = "22787eb5-b846-44ae-b979-8e399b8463ab"
+
+[weakdeps]
 UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
+
+[extensions]
+ExtendableFEMBaseUnicodePlotsExt = ["UnicodePlots"]
 
 [compat]
 DiffResults = "1"
@@ -24,10 +28,10 @@ ExtendableGrids = "1.9.2"
 ExtendableSparse = "1.5.1"
 ForwardDiff = "^0.10.35"
 LinearAlgebra = "1.9"
-Term = "2"
-UnicodePlots = "^3.6"
 Polynomials = "2.0.21, 3, 4"
 Printf = "1.9"
 SparseArrays = "1.9"
 SpecialPolynomials = "0.4.9, 0.5"
+Term = "2"
+UnicodePlots = "^3.6"
 julia = "^1.9"
