@@ -43,7 +43,7 @@ function make_all(; with_examples::Bool = true)
         modules=[ExtendableFEMBase],
         sitename="ExtendableFEMBase.jl",
         authors="Christian Merdon",
-        repo = "https://github.com/chmerdon/ExtendableFEMBase.jl",
+        repo = "https://github.com/WIAS-PDELib/ExtendableFEMBase.jl",
         clean = true,
         format = Documenter.HTML(size_threshold = 250000, mathengine = MathJax3()),
         checkdocs = :all,
