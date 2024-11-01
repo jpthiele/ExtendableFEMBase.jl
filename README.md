@@ -6,7 +6,7 @@
 # ExtendableFEMBase
 
 This package provides basic finite element structures to setup finite element schemes on ExtendableGrids. For a full high-level API
-see [ExtendableFEM.jl](https://github.com/chmerdon/ExtendableFEM.jl).
+see [ExtendableFEM.jl](https://github.com/WIAS-PDELib/ExtendableFEM.jl).
 
 This low level structures in the package incorporate:
 

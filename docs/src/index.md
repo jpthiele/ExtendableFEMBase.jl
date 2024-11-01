@@ -1,6 +1,6 @@
-[![Build status](https://github.com/chmerdon/ExtendableFEMBase.jl/workflows/linux-macos-windows/badge.svg)](https://github.com/chmerdon/ExtendableFEMBase.jl/actions)
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://chmerdon.github.io/ExtendableFEMBase.jl/stable/index.html)
-[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://chmerdon.github.io/ExtendableFEMBase.jl/dev/index.html)
+[![Build status](https://github.com/WIAS-PDELib/ExtendableFEMBase.jl/workflows/linux-macos-windows/badge.svg)](https://github.com/WIAS-PDELib/ExtendableFEMBase.jl/actions)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://wias-pdelib.github.io/ExtendableFEMBase.jl/stable/index.html)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://wias-pdelib.github.io/ExtendableFEMBase.jl/dev/index.html)
 [![DOI](https://zenodo.org/badge/667751152.svg)](https://zenodo.org/doi/10.5281/zenodo.10563410)
 
 # ExtendableFEMBase.jl
@@ -10,8 +10,8 @@ This package provides some low level structures like finite element spaces, inte
 
 ### Dependencies on other Julia packages
 
-[ExtendableGrids.jl](https://github.com/j-fu/ExtendableGrids.jl)\
-[ExtendableSparse.jl](https://github.com/j-fu/ExtendableSparse.jl)\
+[ExtendableGrids.jl](https://github.com/WIAS-PDELib/ExtendableGrids.jl)\
+[ExtendableSparse.jl](https://github.com/WIAS-PDELib/ExtendableSparse.jl)\
 [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl)\
 [DiffResults.jl](https://github.com/JuliaDiff/DiffResults.jl)\
 [UnicodePlots.jl](https://github.com/JuliaPlots/UnicodePlots.jl)\
