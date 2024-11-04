@@ -79,5 +79,5 @@ end
 make_all(; with_examples = false)
 
 deploydocs(
-    repo = "github.com/chmerdon/ExtendableFEMBase.jl",
+    repo = "github.com/WIAS-PDELib/ExtendableFEMBase.jl",
 )
