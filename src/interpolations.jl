@@ -819,7 +819,7 @@ function nodevalues(source::FEVectorBlock{T, Tv, Ti, FEType, APT}, operator::Typ
 	if abs
 		nvals = 1
 	else
-		xdim = size(source.FES.dofgrid[Coordinates], 2)
+		xdim = size(source.FES.dofgrid[Coordinates], 1)
 		ncomponents = get_ncomponents(eltype(source.FES))
 		nvals = Length4Operator(operator, xdim, ncomponents)
 	end
