@@ -8,7 +8,7 @@ using CairoMakie
 function make_all(; with_examples::Bool = true)
 
 	module_examples = []
-    pluto_examples = []
+    pluto_examples = [] 
 
     if with_examples
         
@@ -43,12 +43,11 @@ function make_all(; with_examples::Bool = true)
         modules=[ExtendableFEMBase],
         sitename="ExtendableFEMBase.jl",
         authors="Christian Merdon",
-        repo = "https://github.com/WIAS-PDELib/ExtendableFEMBase.jl",
-        clean = true,
-        format = Documenter.HTML(size_threshold = 250000, mathengine = MathJax3()),
+        format = Documenter.HTML(repolink = "https://github.com/WIAS-PDELib/ExtendableFEMBase.jl", size_threshold = 250000, mathengine = MathJax3()),
+        clean = false,
         checkdocs = :all,
         warnonly = false,
-        doctest = true,
+        doctest = false,
         pages = [
             "Home" => "index.md",
             "Index" => "package_index.md",

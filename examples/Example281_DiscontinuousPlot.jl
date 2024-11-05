@@ -1,7 +1,7 @@
 #=
 
 # 281 : Discontinuous Plot
-([source code](SOURCE_URL))
+([source code](@__SOURCE_URL__))
 
 This example demonstrates how to plot a discontinuous function
 on a grid with two regions by region-wise nodal values and plotting.

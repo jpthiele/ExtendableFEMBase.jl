@@ -1,7 +1,7 @@
 #=
 
 # 210 : Navier-Stokes Problem
-([source code](SOURCE_URL))
+([source code](@__SOURCE_URL__))
 
 Consider the Navier-Stokes problem that seeks ``u`` and ``p`` such that
 ```math

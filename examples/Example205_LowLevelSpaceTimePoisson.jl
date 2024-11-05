@@ -1,7 +1,7 @@
 #=
 
 # 205 : Space-Time FEM for Poisson Problem
-([source code](SOURCE_URL))
+([source code](@__SOURCE_URL__))
 
 This example computes the solution ``u`` of the
 two-dimensional heat equation

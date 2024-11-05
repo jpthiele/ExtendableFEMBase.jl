@@ -1,7 +1,7 @@
 #=
 
 # 280 : Basis-Plotter
-([source code](SOURCE_URL))
+([source code](@__SOURCE_URL__))
 
 This example plots all the basis functions of a H1 finite element on Edge1D or Triangle2D
 as unicode plots. This is the result with the default parameters (dim = 1, order = 3):

@@ -1,7 +1,7 @@
 #=
 
 # 290 : Interpolation Between Meshes
-([source code](SOURCE_URL))
+([source code](@__SOURCE_URL__))
 
 This example demonstrates the interpolation between meshes feature. Here, we interpolate a function with the P2 element of a coarse triangulation and then interpolate
 this P2 function on two uniform refinements into some P1 function. Then, both finite element functions are plotted.
