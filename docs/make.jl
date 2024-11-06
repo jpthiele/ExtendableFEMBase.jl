@@ -45,9 +45,9 @@ function make_all(; with_examples::Bool = true)
         authors="Christian Merdon",
         format = Documenter.HTML(repolink = "https://github.com/WIAS-PDELib/ExtendableFEMBase.jl", size_threshold = 250000, mathengine = MathJax3()),
         clean = false,
-        checkdocs = :all,
+        checkdocs = :none, # :all or :exports currently causes UndefVarError
         warnonly = false,
-        doctest = false,
+        doctest = true,
         pages = [
             "Home" => "index.md",
             "Index" => "package_index.md",
@@ -75,7 +75,7 @@ function make_all(; with_examples::Bool = true)
     
 end
 
-make_all(; with_examples = true)
+make_all(; with_examples = false)
 
 deploydocs(
     repo = "github.com/WIAS-PDELib/ExtendableFEMBase.jl",

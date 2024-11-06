@@ -22,17 +22,28 @@ The qpinfo argument communicates vast information of the current quadrature poin
 
 ## Standard Interpolations
 
-Each finite element has its standard interpolator that can be applied to some user-defined DataFunction. Instead of interpolating on the full cells, the interpolation can be restricted to faces or edges. 
-
-It is also possible to interpolate finite element functions on one grid onto a finite element function on another grid (experimental feature, does not work for all finite elements yet and shall be extended to interpolations of operator evaluations as well in future).
+Each finite element has its standard interpolator that can be applied to some user-defined source Function. Instead of interpolating on the full cells, the interpolation can be restricted to faces or edges via an AssemblyType.
 
 ```@docs
 interpolate!
 ```
 
+It is also possible to interpolate finite element functions on one grid onto a finite element function on another grid via the lazy_interpolate routine.
+
+```@docs
+lazy_interpolate!
+```
+
+The following function continuously interpolates finite element function into a H1Pk space by
+point evaluations at the Lagrange nodes of the H1Pk element (averaged over all neighbours).
+
+```@docs
+continuify
+```
+
 ## Nodal Evaluations
 
-Usually, Plotters need nodal values, so there is a gengeric function that evaluates any finite element function at the nodes of the grids (possibly by averaging if discontinuous). In case of Identity evaluations of an H1-conforming finite element, the function nodevalues_view can generate a view into the coefficient field that avoids further allocations.
+Usually, Plotters need nodal values, so there is a generic function that evaluates any finite element function at the nodes of the grids (possibly by averaging if discontinuous). In case of Identity evaluations of an H1-conforming finite element, the function nodevalues_view can generate a view into the coefficient field that avoids further allocations.
 
 
 ```@docs
@@ -42,14 +53,6 @@ nodevalues_view
 nodevalues_subset!
 ```
 
-## Lazy Interpolation
-
-To interpolate between different finite element spaces and meshes, there is a lazy interpolation routine that
-works in all cases (but is not very efficient as it involves a PointeEvaluator and CellFinder):
-
-```@docs
-lazy_interpolate!
-```
 
 
 ## Displace Mesh

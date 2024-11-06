@@ -3,10 +3,12 @@
 ################## SPECIAL INTERPOLATORS ####################
 
 """
-$(TYPEDSIGNATURES)
+````
+function interpolator_matrix(::Type{<:HDIVRT0{ncomponents}}, V1::FESpace{Tv, Ti, H1Pk{ncomponents, edim, order}, ON_CELLS})
+````
 
 produces a matrix representation for the interpolation
-of H1Pk (currently only up to order 4, only in 2D) 
+of H1Pk (currently only up to order 4, and ncomponents = 2) 
 into HDIVRT0
 """
 function interpolator_matrix(::Type{<:HDIVRT0{ncomponents}}, V1::FESpace{Tv, Ti, H1Pk{ncomponents, edim, order}, ON_CELLS}) where {Tv, Ti, ncomponents, edim, order}
@@ -424,9 +426,11 @@ end
 ##### BOUNDARY COEFFICIENTS #####
 
 """
-$(TYPEDSIGNATURES)
+````
+boundary_coefficients!(coefficients, RH::ReconstructionHandler, cell)
+````
 
-generates the boundarycoefficients for the RT0 reconstruction of CR
+generates the coefficients for the facial dofs of the reconstruction operator on the cell
 """
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, <:H1CR{ncomponents}, <:HDIVRT0{ncomponents}, <:ON_CELLS, EG}, cell) where {Tv, Ti, ncomponents, EG}
 	xFaceVolumes = RH.xFaceVolumes
@@ -446,11 +450,6 @@ end
 
 const _P1_INTO_BDM1_COEFFS = [-1 // 12, 1 // 12]
 
-"""
-$(TYPEDSIGNATURES)
-
-generates the boundarycoefficients for the BDM1 reconstruction of BR in two dimensions
-"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{2}, FE2 <: HDIVBDM1{2}, AT <: ON_CELLS, EG <: Union{Triangle2D, Quadrilateral2D}}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -479,11 +478,6 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 	return nothing
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-generates the boundarycoefficients for the RT0 reconstruction of BR in two dimensions
-"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{2}, FE2 <: HDIVRT0{2}, AT <: ON_CELLS, EG <: Union{Triangle2D, Quadrilateral2D}}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -508,11 +502,6 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 	return nothing
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-generates the boundarycoefficients for the RT1 reconstruction of P2B in two dimensions
-"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1P2B{2, 2}, FE2 <: HDIVRT1{2}, AT <: ON_CELLS, EG <: Triangle2D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -544,11 +533,6 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 	return nothing
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-generates the boundarycoefficients for the BDM2 reconstruction of P2B in two dimensions
-"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1P2B{2, 2}, FE2 <: HDIVBDM2{2}, AT <: ON_CELLS, EG <: Triangle2D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -587,11 +571,6 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 end
 
 
-"""
-$(TYPEDSIGNATURES)
-
-generates the boundarycoefficients for the RT0 reconstruction of BR in three dimensions
-"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{3}, FE2 <: HDIVRT0{3}, AT <: ON_CELLS, EG <: Tetrahedron3D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -617,11 +596,6 @@ end
 
 const _P1_INTO_BDM1_COEFFS_3D = [-1//36 -1//36 1//18; -1//36 1//18 -1//36; 1//18 -1//36 -1//36]
 
-"""
-$(TYPEDSIGNATURES)
-
-generates the boundarycoefficients for the BDM1 reconstruction of BR in three dimensions
-"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{3}, FE2 <: HDIVBDM1{3}, AT <: ON_CELLS, EG <: Tetrahedron3D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals

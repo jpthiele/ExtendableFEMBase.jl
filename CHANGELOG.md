@@ -1,7 +1,9 @@
 # CHANGES
 
+## next version
+  - doc improvements
 
-## v0.8.1 November 4, 2024
+## v0.8.1 November 5, 2024
   - fixed dimension in nodevals output (xdim was determined wrongly and caused huge arrays)
   - examples in the documentation reactivated
 

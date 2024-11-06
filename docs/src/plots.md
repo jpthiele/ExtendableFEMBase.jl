@@ -12,8 +12,8 @@ In Pluto notebooks it is recommended to use [PlutoVista.jl](https://github.com/j
 For a fast and rough peak several UnicodePlots plotters are available via an extension (ExtendableFEMBaseUnicodePlotsExt)
 that is loaded when UnicodePlots is available.
 
-```@autodocs
-Modules = [ExtendableFEMBase]
-Pages = ["plots.jl"]
-Order   = [:type, :function]
+
+```@docs
+unicode_gridplot
+unicode_scalarplot
 ```

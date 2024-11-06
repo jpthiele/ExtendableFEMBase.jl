@@ -77,8 +77,6 @@ export QuadratureRule
 export VertexRule
 export integrate!, integrate, ref_integrate!
 
-
-
 include("finiteelements.jl") # also includes dofmaps.jl and feevaluator*.jl
 export DofMap
 export CellDofs, FaceDofs, EdgeDofs, BFaceDofs, BEdgeDofs
@@ -173,17 +171,48 @@ export lazy_interpolate!
 
 # ExtendableFEMBaseUnicodePlotsExt extension
 
-"""
-$(TYPEDSIGNATURES)
 
-plots the grid via UnicodePlots
+"""
+````
+function unicode_gridplot(
+	xgrid::ExtendableGrid;
+	title = "gridplot",
+	resolution = (40,20),
+	color = (200,200,200),
+	bface_color = (255,0,0),
+	CanvasType = BrailleCanvas,
+	plot_based = ON_CELLS,   # or ON_FACES/ON_EDGES
+	kwargs...
+````
+
+(via extension that requires UnicodePlots)
+
+Plots the grid on a UnicodePlots canvas (default: BrailleCanvas) by drawing all edges in the triangulation.
 """
 function unicode_gridplot end
 
 """
-$(TYPEDSIGNATURES)
+````
+function unicode_scalarplot(
+	u::FEVectorBlock; 
+	components = 1:get_ncomponents(u),
+	abs = false,
+	resolution = (30,30),
+	colormap = :viridis,
+	title = u.name,
+	kwargs...)
+````
 
-plots a finite element function (given as an FEVectorBlock) via UnicodePlots
+(via extension that requires UnicodePlots)
+
+Plots components of the finite element function in the FEVectorBlock u by
+using a lazy_interpolate! onto a coarse uniform mesh and UnicodePlots.jl
+lineplot or heatmap for 1D or 2D, respectively.
+
+In 1D all components all plotted in the same lineplot, while
+in 2D all components are plotted in a separate heatmap.
+
+If abs = true, only the absolute value over the components is plotted.
 """
 function unicode_scalarplot end
 export unicode_gridplot, unicode_scalarplot
