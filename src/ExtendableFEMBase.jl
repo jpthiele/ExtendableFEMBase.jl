@@ -13,7 +13,7 @@ using ExtendableGrids: ExtendableGrids, AT_NODES, AbstractElementGeometry,
 	AbstractGridFloatArray2D, AbstractGridIntegerArray2D,
 	Adjacency, AssemblyType, BEdgeEdges, BEdgeGeometries,
 	BEdgeRegions, BEdgeVolumes, BFaceEdges, BFaceFaces,
-	BFaceGeometries, BFaceNodes, BFaceParents, BFaceRegions,
+	BFaceGeometries, BFaceParents, BFaceRegions,
 	BFaceVolumes, CellEdgeSigns, CellEdges,
 	CellFaceOrientations, CellFaceSigns, CellFaces,
 	CellFinder, CellGeometries, CellNodes, CellParents,
@@ -40,7 +40,7 @@ using ExtendableGrids: ExtendableGrids, AT_NODES, AbstractElementGeometry,
 	local_celledgenodes, local_cellfacenodes, mapderiv!,
 	max_num_targets_per_source, num_cells, num_edges,
 	num_faces, num_nodes, num_sources, num_targets,
-	reference_domain, simplexgrid, subgrid, unique,
+	reference_domain, subgrid, unique,
 	update_trafo!
 using ExtendableSparse: ExtendableSparse, ExtendableSparseMatrix, flush!,
 	AbstractExtendableSparseMatrixCSC, ExtendableSparseMatrixCSC, MTExtendableSparseMatrixCSC,
@@ -51,7 +51,7 @@ using LinearAlgebra: LinearAlgebra, convert, det, diagm, dot, eigen, ldiv!, lu,
 using Polynomials: Polynomials, Polynomial, coeffs
 using Printf: Printf, @printf
 using SparseArrays: SparseArrays, AbstractSparseArray, AbstractSparseMatrix,
-	SparseMatrixCSC, nzrange, rowvals, sparse
+	SparseMatrixCSC, nzrange, rowvals
 using SpecialPolynomials: SpecialPolynomials, ShiftedLegendre, basis
 
 include("functionoperators.jl")

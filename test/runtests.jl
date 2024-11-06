@@ -1,6 +1,7 @@
 using Test
 using ExtendableGrids
 using ExtendableFEMBase
+using ExplicitImports
 using ExampleJuggler
 using SparseArrays
 using Aqua
@@ -14,11 +15,17 @@ using Aqua
 	Aqua.test_ambiguities(ExtendableFEMBase)
 end
 
+@testset "ExplicitImports" begin
+    @test ExplicitImports.check_no_implicit_imports(ExtendableFEMBase) === nothing
+    @test ExplicitImports.check_no_stale_explicit_imports(ExtendableFEMBase) === nothing
+end
+
 if isdefined(Docs, :undocumented_names) # >=1.11
 	@testset "UndocumentedNames" begin
 		@test isempty(Docs.undocumented_names(ExtendableFEMBase))
 	end
 end
+
 
 include("test_quadrature.jl")
 include("test_interpolators.jl")
