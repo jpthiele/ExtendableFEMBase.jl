@@ -75,7 +75,7 @@ function make_all(; with_examples::Bool = true)
     
 end
 
-make_all(; with_examples = false)
+make_all(; with_examples = true)
 
 deploydocs(
     repo = "github.com/WIAS-PDELib/ExtendableFEMBase.jl",
