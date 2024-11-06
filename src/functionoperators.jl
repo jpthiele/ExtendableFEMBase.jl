@@ -3,8 +3,13 @@ $(TYPEDEF)
 
 root type for FunctionOperators.
 """
-abstract type AbstractFunctionOperator end # to dispatch which evaluator of the FE_basis_caller is used
+abstract type AbstractFunctionOperator end
 
+"""
+$(TYPEDEF)
+
+root type for StandardFunctionOperators
+"""
 abstract type StandardFunctionOperator <: AbstractFunctionOperator end
 
 """
@@ -113,11 +118,24 @@ $(TYPEDEF)
 evaluates the divergence of the finite element function.
 """
 abstract type Divergence <: StandardFunctionOperator end # div(v_h)
+"""
+$(TYPEDEF)
 
+evaluates the trace of a matrix-valued function.
+"""
 abstract type Trace <: StandardFunctionOperator end # tr(v_h)
+"""
+$(TYPEDEF)
+
+evaluates the deviator of a matrix-valued function
+"""
 abstract type Deviator <: StandardFunctionOperator end # dev(v_h)
 
 
+"""
+$(TYPEDSIGNATURES)
+number of derivatives that are needed to evaluate the operator
+"""
 NeededDerivative4Operator(::Type{<:Identity}) = 0
 NeededDerivative4Operator(::Type{<:IdentityComponent}) = 0
 NeededDerivative4Operator(::Type{<:NormalFlux}) = 0
@@ -135,6 +153,11 @@ NeededDerivative4Operator(::Type{<:Divergence}) = 1
 NeededDerivative4Operator(::Type{Trace}) = 0
 NeededDerivative4Operator(::Type{Deviator}) = 0
 
+
+"""
+$(TYPEDSIGNATURES)
+default name of the operator for print-outs
+"""
 DefaultName4Operator(::Type{<:AbstractFunctionOperator}) = "??"
 DefaultName4Operator(::Type{Identity}) = "id"
 DefaultName4Operator(IC::Type{<:IdentityComponent{T}}) where T = "id_$(T)"
@@ -158,6 +181,11 @@ function Base.show(io::Core.IO, FO::Type{<:AbstractFunctionOperator})
 end
 
 # length for operator result
+
+"""
+$(TYPEDSIGNATURES)
+number of expected components for the operator in xdim dimensions and a function value dimension of ncomponents
+"""
 Length4Operator(::Type{<:Identity}, xdim::Int, ncomponents::Int) = ncomponents
 Length4Operator(::Type{<:IdentityComponent}, xdim::Int, ncomponents::Int) = 1
 Length4Operator(::Type{<:NormalFlux}, xdim::Int, ncomponents::Int) = 1
@@ -175,6 +203,10 @@ Length4Operator(::Type{<:SymmetricHessian}, xdim::Int, ncomponents::Int) = ((xdi
 Length4Operator(::Type{<:Laplacian}, xdim::Int, ncomponents::Int) = ncomponents
 
 
+"""
+$(TYPEDSIGNATURES)
+default quadrature order shift for an operator (basically equals minus the number of derivatives)
+"""
 QuadratureOrderShift4Operator(operator) = -NeededDerivative4Operator(operator)
 
 

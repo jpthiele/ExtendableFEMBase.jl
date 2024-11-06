@@ -18,8 +18,8 @@ struct FEVectorBlock{T, Tv, Ti, FEType, APT} <: AbstractArray{T, 1}
 	entries::Array{T, 1} # shares with parent object
 end
 
-function Base.copy(FEB::FEVectorBlock{T,Tv,Ti,FEType,APT}, entries) where {T,Tv,Ti,FEType,APT}
-    return FEVectorBlock{T,Tv,Ti,FEType,APT}(deepcopy(FEB.name), copy(FEB.FES), FEB.offset, FEB.last_index, entries)
+function Base.copy(FEB::FEVectorBlock{T, Tv, Ti, FEType, APT}, entries) where {T, Tv, Ti, FEType, APT}
+	return FEVectorBlock{T, Tv, Ti, FEType, APT}(deepcopy(FEB.name), copy(FEB.FES), FEB.offset, FEB.last_index, entries)
 end
 
 get_ncomponents(FB::FEVectorBlock) = get_ncomponents(get_FEType(FB.FES))
@@ -51,9 +51,9 @@ struct FEVector{T, Tv, Ti} #<: AbstractVector{T}
 	tags::Vector{Any}
 end
 
-function Base.copy(FEV::FEVector{T,Tv,Ti}) where {T,Tv,Ti}
-    entries = deepcopy(FEV.entries)
-    return FEVector{T,Tv,Ti}([copy(B, entries) for B in FEV.FEVectorBlocks], entries, [t for t in FEV.tags])
+function Base.copy(FEV::FEVector{T, Tv, Ti}) where {T, Tv, Ti}
+	entries = deepcopy(FEV.entries)
+	return FEVector{T, Tv, Ti}([copy(B, entries) for B in FEV.FEVectorBlocks], entries, [t for t in FEV.tags])
 end
 
 # overload stuff for AbstractArray{T,1} behaviour
@@ -85,6 +85,11 @@ function LinearAlgebra.norm(FEV::FEVectorBlock, p::Real = 2)
 	return norm(view(FEV), p)
 end
 
+"""
+$(TYPEDEF)
+
+returns a vector with the individual norms of all blocks
+"""
 function norms(FEV::FEVector{T}, p::Real = 2) where {T}
 	norms = zeros(T, length(FEV))
 	for j ∈ 1:length(FEV)

@@ -1,52 +1,57 @@
+"""
+	ExtendableFEMBase
+
+$(read(joinpath(@__DIR__,"..","README.md"),String))
+"""
 module ExtendableFEMBase
 
 using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDSIGNATURES
 using ExtendableGrids: ExtendableGrids, AT_NODES, AbstractElementGeometry,
-						AbstractElementGeometry0D, AbstractElementGeometry1D,
-						AbstractElementGeometry2D, AbstractElementGeometry3D,
-						AbstractGridAdjacency, AbstractGridComponent,
-						AbstractGridFloatArray2D, AbstractGridIntegerArray2D,
-						Adjacency, AssemblyType, BEdgeEdges, BEdgeGeometries,
-						BEdgeRegions, BEdgeVolumes, BFaceEdges, BFaceFaces,
-						BFaceGeometries, BFaceNodes, BFaceParents, BFaceRegions,
-						BFaceVolumes, CellEdgeSigns, CellEdges,
-						CellFaceOrientations, CellFaceSigns, CellFaces,
-						CellFinder, CellGeometries, CellNodes, CellParents,
-						CellRegions, CellVolumes, Coordinates, Edge1D,
-						EdgeCells, EdgeGeometries, EdgeNodes, EdgeTangents,
-						EdgeVolumes, ElementGeometries, ExtendableGrid,
-						FaceCells, FaceEdgeSigns, FaceEdges, FaceGeometries,
-						FaceNodes, FaceNormals, FaceParents, FaceRegions,
-						FaceVolumes, GridComponentGeometries4AssemblyType,
-						GridComponentNodes4AssemblyType,
-						GridComponentRegions4AssemblyType,
-						GridComponentUniqueGeometries4AssemblyType,
-						GridComponentVolumes4AssemblyType, GridEGTypes,
-						GridRegionTypes, Hexahedron3D, L2GTransformer,
-						ON_BEDGES, ON_BFACES, ON_CELLS, ON_EDGES, ON_FACES,
-						ON_IFACES, Parallelepiped3D, Parallelogram2D,
-						ParentGrid, ParentGridRelation, Quadrilateral2D,
-						SerialVariableTargetAdjacency, SubGrid, Tetrahedron3D,
-						Triangle2D, UniqueBEdgeGeometries,
-						UniqueBFaceGeometries, UniqueCellGeometries,
-						UniqueEdgeGeometries, UniqueFaceGeometries,
-						VariableTargetAdjacency, Vertex0D, append!, atranspose,
-						dim_element, eval_trafo!, gFindLocal!, interpolate!,
-						local_celledgenodes, local_cellfacenodes, mapderiv!,
-						max_num_targets_per_source, num_cells, num_edges,
-						num_faces, num_nodes, num_sources, num_targets,
-						reference_domain, simplexgrid, subgrid, unique,
-						update_trafo!
+	AbstractElementGeometry0D, AbstractElementGeometry1D,
+	AbstractElementGeometry2D, AbstractElementGeometry3D,
+	AbstractGridAdjacency, AbstractGridComponent,
+	AbstractGridFloatArray2D, AbstractGridIntegerArray2D,
+	Adjacency, AssemblyType, BEdgeEdges, BEdgeGeometries,
+	BEdgeRegions, BEdgeVolumes, BFaceEdges, BFaceFaces,
+	BFaceGeometries, BFaceNodes, BFaceParents, BFaceRegions,
+	BFaceVolumes, CellEdgeSigns, CellEdges,
+	CellFaceOrientations, CellFaceSigns, CellFaces,
+	CellFinder, CellGeometries, CellNodes, CellParents,
+	CellRegions, CellVolumes, Coordinates, Edge1D,
+	EdgeCells, EdgeGeometries, EdgeNodes, EdgeTangents,
+	EdgeVolumes, ElementGeometries, ExtendableGrid,
+	FaceCells, FaceEdgeSigns, FaceEdges, FaceGeometries,
+	FaceNodes, FaceNormals, FaceParents, FaceRegions,
+	FaceVolumes, GridComponentGeometries4AssemblyType,
+	GridComponentNodes4AssemblyType,
+	GridComponentRegions4AssemblyType,
+	GridComponentUniqueGeometries4AssemblyType,
+	GridComponentVolumes4AssemblyType, GridEGTypes,
+	GridRegionTypes, Hexahedron3D, L2GTransformer,
+	ON_BEDGES, ON_BFACES, ON_CELLS, ON_EDGES, ON_FACES,
+	ON_IFACES, Parallelepiped3D, Parallelogram2D,
+	ParentGrid, ParentGridRelation, Quadrilateral2D,
+	SerialVariableTargetAdjacency, SubGrid, Tetrahedron3D,
+	Triangle2D, UniqueBEdgeGeometries,
+	UniqueBFaceGeometries, UniqueCellGeometries,
+	UniqueEdgeGeometries, UniqueFaceGeometries,
+	VariableTargetAdjacency, Vertex0D, append!, atranspose,
+	dim_element, eval_trafo!, gFindLocal!, interpolate!,
+	local_celledgenodes, local_cellfacenodes, mapderiv!,
+	max_num_targets_per_source, num_cells, num_edges,
+	num_faces, num_nodes, num_sources, num_targets,
+	reference_domain, simplexgrid, subgrid, unique,
+	update_trafo!
 using ExtendableSparse: ExtendableSparse, ExtendableSparseMatrix, flush!,
-						AbstractExtendableSparseMatrixCSC, ExtendableSparseMatrixCSC, MTExtendableSparseMatrixCSC,
-						rawupdateindex!
+	AbstractExtendableSparseMatrixCSC, ExtendableSparseMatrixCSC, MTExtendableSparseMatrixCSC,
+	rawupdateindex!
 using ForwardDiff: ForwardDiff, DiffResults
 using LinearAlgebra: LinearAlgebra, convert, det, diagm, dot, eigen, ldiv!, lu,
-					mul!, norm, transpose
+	mul!, norm, transpose
 using Polynomials: Polynomials, Polynomial, coeffs
 using Printf: Printf, @printf
 using SparseArrays: SparseArrays, AbstractSparseArray, AbstractSparseMatrix,
-					SparseMatrixCSC, nzrange, rowvals, sparse
+	SparseMatrixCSC, nzrange, rowvals, sparse
 using SpecialPolynomials: SpecialPolynomials, ShiftedLegendre, basis
 
 include("functionoperators.jl")
@@ -167,7 +172,19 @@ export lazy_interpolate!
 
 
 # ExtendableFEMBaseUnicodePlotsExt extension
+
+"""
+$(TYPEDSIGNATURES)
+
+plots the grid via UnicodePlots
+"""
 function unicode_gridplot end
+
+"""
+$(TYPEDSIGNATURES)
+
+plots a finite element function (given as an FEVectorBlock) via UnicodePlots
+"""
 function unicode_scalarplot end
 export unicode_gridplot, unicode_scalarplot
 

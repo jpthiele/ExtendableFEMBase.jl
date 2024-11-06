@@ -24,9 +24,32 @@ abstract type AbstractFiniteElement end
 # below subtypes are defined that define basis functions on reference geometries 
 # and some other information like polyonomial degrees etc.
 
+"""
+$(TYPEDEF)
+
+root type for Hdiv-conforming finite element types
+"""
 abstract type AbstractHdivFiniteElement <: AbstractFiniteElement end
+
+"""
+$(TYPEDEF)
+
+root type for H1-conforming finite element types
+"""
 abstract type AbstractH1FiniteElement <: AbstractFiniteElement end
+
+"""
+$(TYPEDEF)
+
+root type for H1-conforming finite element types with additional coefficients
+"""
 abstract type AbstractH1FiniteElementWithCoefficients <: AbstractH1FiniteElement end
+
+"""
+$(TYPEDEF)
+
+root type for Hcurl-conforming finite element types with additional coefficients
+"""
 abstract type AbstractHcurlFiniteElement <: AbstractFiniteElement end
 
 
@@ -51,7 +74,7 @@ struct FESpace{Tv, Ti, FEType <: AbstractFiniteElement, AT <: AssemblyType}
 	ndofs::Int64                          # total number of dofs
 	coffset::Int                          # offset for component dofs
 	xgrid::ExtendableGrid{Tv, Ti}         # link to (master/parent) grid 
-	dofgrid::ExtendableGrid{Tv,Ti}	      # link to (sub) grid used for dof numbering (expected to be equal to or child grid of xgrid)
+	dofgrid::ExtendableGrid{Tv, Ti}      # link to (sub) grid used for dof numbering (expected to be equal to or child grid of xgrid)
 	dofmaps::Dict{Type{<:AbstractGridComponent}, Any} # backpack with dofmaps
 end
 
@@ -203,24 +226,74 @@ end
 const NothingFunction = (x, y) -> nothing
 
 #get_polynomialorder(::Type{<:AbstractFiniteElement}, ::Type{Vertex0D}) = 1
+"""
+$(TYPEDSIGNATURES)
+
+returns the number of components of the FESpace (= number of components of its FEType)
+"""
 get_ncomponents(FES::FESpace) = get_ncomponents(get_FEType(FES))
 
-# default coefficient functions that can be overwritten by finite element that has non-default coefficients
-# ( see e.g. h1v_br.jl )
+
+"""
+$(TYPEDSIGNATURES)
+
+returns the coefficients for local evaluations of finite element functions
+( see e.g. h1v_br.jl for a use-case)
+"""
 function get_coefficients(::Type{<:AssemblyType}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{<:AbstractElementGeometry}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
 	return NothingFunction
 end
 
-# it is assumed that subset_ids is already 1 vector of form subset_ids = 1:ndofs
-# meaning that all basis functions on the reference cells are used
-# see 3D implementation of BDM1 for an example how this is can be used the choose
-# different basis functions depending on the face orientations (which in 3D is not just a sign)
+"""
+$(TYPEDSIGNATURES)
+
+returns a closure function of the form
+	
+	closure(subset_ids::Array{Int, 1}, cell)
+
+which returns the ids of the local basis functions needed on the cell.
+Usually, subset_ids = 1:ndofs (meaning that all basis functions on the reference cells are used),
+
+See e.g. the 3D implementation of BDM1 or H1P3
+where different basis functions are chosen
+depending on the face orientations (which in 3D is not just a sign)
+
+"""
 function get_basissubset(::Type{<:AssemblyType}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{<:AbstractElementGeometry}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
 	return NothingFunction
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+returns the number of degrees of freedom for the given AssemblyType, FEType and geometry
+"""
 get_ndofs(AT::Type{<:AssemblyType}, FEType::Type{<:AbstractFiniteElement}, EG::Type{<:AbstractElementGeometry}) = 0 # element is undefined for this AT or EG
+
+"""
+$(TYPEDSIGNATURES)
+
+returns the closure function of form
+
+	closure(refbasis, xref)
+
+that computes the evaluations of the basis functions on the reference geometry
+"""
 get_basis(AT::Type{<:AssemblyType}, FEType::Type{<:AbstractFiniteElement}, EG::Type{<:AbstractElementGeometry}) = (refbasis, xref) -> nothing
+
+
+"""
+$(TYPEDSIGNATURES)
+
+returns the total number of degrees of freedom for the given AssemblyType, FEType and geometry
+"""
 get_ndofs_all(AT::Type{<:AssemblyType}, FEType::Type{<:AbstractFiniteElement}, EG::Type{<:AbstractElementGeometry}) = get_ndofs(AT, FEType, EG)
+
+"""
+$(TYPEDSIGNATURES)
+
+tells if FEType is defined on this ElementGeometry
+"""
 isdefined(FEType::Type{<:AbstractFiniteElement}, EG::Type{<:AbstractElementGeometry}) = false
 isdefined(FEType::Type{<:AbstractFiniteElement}, EG::Type{<:AbstractElementGeometry}, ::Bool) = isdefined(FEType, EG)
 
@@ -244,7 +317,12 @@ value triggers type instability.
 """
 Base.getindex(FES::FESpace, DM::Type{<:DofMap}) = get!(FES, DM)
 
-function count_ndofs(xgrid, FEType, broken)
+"""
+$(TYPEDSIGNATURES)
+counts the total number of degrees of freedom for the FEType
+for the whole grid
+"""
+function count_ndofs(xgrid, FEType, broken::Bool)
 	EG = xgrid[UniqueCellGeometries]
 	xItemGeometries = xgrid[CellGeometries]
 	if length(EG) == 1
@@ -306,10 +384,27 @@ include("fematrix.jl");
 include("interpolations.jl")
 
 
-# dummy functions
+
+"""
+$(TYPEDSIGNATURES)
+returns the element dimension of the finite element
+"""
 get_edim(FEType::Type{<:AbstractFiniteElement}) = 0 # not defined
 #get_polynomialorder(::Type{<:AbstractFiniteElement}, ::Type{<:Vertex0D}) = 0
+
+"""
+$(TYPEDSIGNATURES)
+returns the offset for the interior degrees of freedom (all vertex, face and edge
+dofs are assumed to come first and before that number)
+"""
 interior_dofs_offset(AT::Type{<:AssemblyType}, FE::Type{<:AbstractFiniteElement}, EG::Type{<:AbstractElementGeometry}) = -1 # should be specified by element if needed
+
+"""
+$(TYPEDSIGNATURES)
+returns the expected polynomial order of the basis functions
+(used to determine default quadrature orders)
+"""
+get_polynomialorder(AT::Type{<:AssemblyType}, FE::Type{<:AbstractFiniteElement}, EG::Type{<:AbstractElementGeometry}) = -1 # should be specified by element if needed
 
 
 ###########################

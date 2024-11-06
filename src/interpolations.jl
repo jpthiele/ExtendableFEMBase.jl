@@ -462,7 +462,7 @@ function nodevalues_subset!(target::AbstractArray{T, 2},
 				while xItemNodes[i, item] != node
 					i += 1
 				end
-	
+
 				# find index for CellType
 				if length(EG) > 1
 					itemET = xItemGeometries[item]
@@ -713,7 +713,7 @@ function piecewise_nodevalues!(target::AbstractArray{T, 2},
 					for i in eachindex(weights) # vertices
 						node = xItemNodes[i, item]
 						fill!(localT, 0)
-						
+
 						for dof_i ∈ 1:ndofs
 							dof = xItemDofs[dof_i, item]
 							eval_febe!(temp, BE, dof_i, i)
@@ -725,17 +725,17 @@ function piecewise_nodevalues!(target::AbstractArray{T, 2},
 						localT .*= factor
 						if abs
 							for k ∈ 1:cvals_resultdim
-								target[target_offset + i, item] += localT[k]^2
+								target[target_offset+i, item] += localT[k]^2
 							end
 						else
 							for k ∈ 1:cvals_resultdim
-								target[target_offset + i + (k-1)*nweights, item] += localT[k]
+								target[target_offset+i+(k-1)*nweights, item] += localT[k]
 							end
 						end
 					end
 
 					if abs
-						for i = 1 : nweights
+						for i ∈ 1:nweights
 							target[i+target_offset, item] = sqrt(target[i+target_offset, item])
 						end
 					end
@@ -808,7 +808,7 @@ are set to zero.
 Discontinuous (continuous = false) quantities are evaluated in all neighbouring cells of each node and then averaged. Continuous
 (continuous = true) quantities are only evaluated once at each node.
 """
-function nodevalues(source::FEVectorBlock{T, Tv, Ti, FEType, APT}, operator::Type{<:AbstractFunctionOperator} = Identity; continuous = "auto", nodes= [], cellwise = false, abs = false, kwargs...) where {T, Tv, Ti, APT, FEType}
+function nodevalues(source::FEVectorBlock{T, Tv, Ti, FEType, APT}, operator::Type{<:AbstractFunctionOperator} = Identity; continuous = "auto", nodes = [], cellwise = false, abs = false, kwargs...) where {T, Tv, Ti, APT, FEType}
 	if continuous == "auto"
 		if FEType <: AbstractH1FiniteElement && operator == Identity && !source.FES.broken && !(FEType <: H1CR)
 			continuous = true
@@ -900,7 +900,6 @@ function continuify(
 interpolates operator evaluation of source into a FE function of FEType H1Pk, i.e., Lagrange interpolation of arbitrary 
 operator evaluations of the source finite element type, broken = true generates a piecewise interpolation
 """
-## interpolates operator evaluation of source into a H1Pk FE function
 function continuify(
 	source::FEVectorBlock{T, Tv, Ti, FEType, APT},
 	operator::Type{<:AbstractFunctionOperator} = Identity;

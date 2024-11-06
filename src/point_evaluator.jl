@@ -99,7 +99,7 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 	itemgeometries = xgrid[CellGeometries]
 
 	O.CF = CellFinder(xgrid)
-	O.xref = zeros(T, size(xgrid[Coordinates],1))
+	O.xref = zeros(T, size(xgrid[Coordinates], 1))
 
 	O.BE_args = Array{Array{<:FEEvaluator, 1}, 1}([])
 	O.L2G = []
@@ -169,12 +169,12 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 
 	## initialize cell finder
 	CF = CellFinder(xgrid)
-	xref = zeros(T, size(xgrid[Coordinates],1))
+	xref = zeros(T, size(xgrid[Coordinates], 1))
 	function _evaluate!(
 		result,
 		BE_args::Array{<:FEEvaluator, 1},
 		L2G::L2GTransformer,
-		x
+		x,
 	)
 
 
@@ -234,7 +234,7 @@ function evaluate!(
 	result,
 	PE::PointEvaluator,
 	x;
-	kwargs...
+	kwargs...,
 )
 	# find correct cell (start from cell of last evaluation)
 	item = gFindLocal!(PE.xref, PE.CF, x; icellstart = PE.lastitem, kwargs...)

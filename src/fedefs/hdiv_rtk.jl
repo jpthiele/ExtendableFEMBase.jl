@@ -9,26 +9,26 @@ allowed ElementGeometries:
 - Triangle2D
 """
 abstract type HDIVRTk{edim, order} <: AbstractHdivFiniteElement where {edim <: Int, order <: Int} end
-HDIVRTk(edim::Int,order::Int) = HDIVRTk{edim,order}
-HDIVRTk(;edim::Int,order::Int) = HDIVRTk{edim,order}
+HDIVRTk(edim::Int, order::Int) = HDIVRTk{edim, order}
+HDIVRTk(; edim::Int, order::Int) = HDIVRTk{edim, order}
 
 function Base.show(io::Core.IO, FEType::Type{<:HDIVRTk{edim, order}}) where {edim, order}
 	print(io, "HDIVRTk{$edim, $order}")
 end
 
 get_ncomponents(FEType::Type{<:HDIVRTk}) = FEType.parameters[1]
-get_ndofs(::Union{Type{<:ON_FACES}, Type{<:ON_BFACES}}, FEType::Type{<:HDIVRTk{edim, order}}, EG::Type{<:AbstractElementGeometry1D}) where {edim, order} = order+1
-get_ndofs(::Type{ON_CELLS}, FEType::Type{<:HDIVRTk{edim, order}}, EG::Type{<:Triangle2D}) where {edim, order} = (order+1) * num_faces(EG) + order * (order+1)
+get_ndofs(::Union{Type{<:ON_FACES}, Type{<:ON_BFACES}}, FEType::Type{<:HDIVRTk{edim, order}}, EG::Type{<:AbstractElementGeometry1D}) where {edim, order} = order + 1
+get_ndofs(::Type{ON_CELLS}, FEType::Type{<:HDIVRTk{edim, order}}, EG::Type{<:Triangle2D}) where {edim, order} = (order + 1) * num_faces(EG) + order * (order + 1)
 
 get_polynomialorder(::Type{<:HDIVRTk{2, order}}, ::Type{<:AbstractElementGeometry1D}) where {order} = order;
-get_polynomialorder(::Type{<:HDIVRTk{2, order}}, ::Type{<:AbstractElementGeometry2D}) where {order} = order+1;
+get_polynomialorder(::Type{<:HDIVRTk{2, order}}, ::Type{<:AbstractElementGeometry2D}) where {order} = order + 1;
 
 get_dofmap_pattern(FEType::Type{<:HDIVRTk{2, order}}, ::Type{CellDofs}, EG::Type{<:Triangle2D}) where {order} = "f$(order+1)" * (order > 0 ? "i$(Int((order+1)*(order)))" : "")
-get_dofmap_pattern(FEType::Type{<:HDIVRTk{2, order}}, ::Union{Type{FaceDofs}, Type{BFaceDofs}}, EG::Type{<:AbstractElementGeometry1D}) where{order} = "i$(order+1)"
+get_dofmap_pattern(FEType::Type{<:HDIVRTk{2, order}}, ::Union{Type{FaceDofs}, Type{BFaceDofs}}, EG::Type{<:AbstractElementGeometry1D}) where {order} = "i$(order+1)"
 
 isdefined(FEType::Type{<:HDIVRTk}, ::Type{<:Triangle2D}) = true
 
-interior_dofs_offset(::Type{<:ON_CELLS}, ::Type{<:HDIVRTk{2, order}}, ::Type{<:Triangle2D}) where {order} = 3*(order+1)
+interior_dofs_offset(::Type{<:ON_CELLS}, ::Type{<:HDIVRTk{2, order}}, ::Type{<:Triangle2D}) where {order} = 3 * (order + 1)
 
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, HDIVRTk{edim, order}, APT}, ::Type{ON_FACES}, data; items = [], bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, edim, order, APT}
@@ -41,16 +41,16 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 
 	# integrate normal flux of exact_function over edges
 	data_eval = zeros(T, ncomponents)
-    moments_weights = basis.(ShiftedLegendre, (0:order))
-    offset = [k*nfaces for k = 0:order]
+	moments_weights = basis.(ShiftedLegendre, (0:order))
+	offset = [k * nfaces for k ∈ 0:order]
 	function normalflux_eval(result, qpinfo)
 		data(data_eval, qpinfo)
 		result[1] = dot(data_eval, view(xFaceNormals, :, qpinfo.item))
-        for j = 1 : order
-		    result[j+1] = result[1] * moments_weights[j+1](qpinfo.xref[1])
-        end
+		for j ∈ 1:order
+			result[j+1] = result[1] * moments_weights[j+1](qpinfo.xref[1])
+		end
 	end
-	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; quadorder = 2*order + bonus_quadorder, items = items, offset = offset, kwargs...)
+	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; quadorder = 2 * order + bonus_quadorder, items = items, offset = offset, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, HDIVRTk{edim, order}, APT}, ::Type{ON_CELLS}, data; items = [], time = 0, bonus_quadorder = 0, kwargs...) where {T, Tv, Ti, edim, order, APT}
@@ -58,12 +58,12 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 	subitems = slice(FE.dofgrid[CellFaces], items)
 	interpolate!(Target, FE, ON_FACES, data; items = subitems, bonus_quadorder = bonus_quadorder, kwargs...)
 
-    if order == 0
-        return nothing
-    end
+	if order == 0
+		return nothing
+	end
 
 	# set values of interior functions as piecewise best-approximation
-    FEType = HDIVRTk{edim, order}
+	FEType = HDIVRTk{edim, order}
 	ncomponents = get_ncomponents(FEType)
 	EG = (ncomponents == 2) ? Triangle2D : Tetrahedron3D
 	ndofs = get_ndofs(ON_CELLS, FEType, EG)
@@ -73,7 +73,7 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 	xCellVolumes::Array{Tv, 1} = FE.dofgrid[CellVolumes]
 	xCellRegions = FE.dofgrid[CellRegions]
 	xCellDofs::DofMapTypes{Ti} = FE[CellDofs]
-	qf = QuadratureRule{T, EG}(max(2*order, order + 1 + bonus_quadorder))
+	qf = QuadratureRule{T, EG}(max(2 * order, order + 1 + bonus_quadorder))
 	FEB = FEEvaluator(FE, Identity, qf; T = T)
 	QP = QPInfos(FE.dofgrid)
 
@@ -130,9 +130,9 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 				# mass matrix of face basis functions
 				for dof2 ∈ 1:interior_offset
 					temp = 0
-                    for k ∈ 1:ncomponents
-                        temp += basisvalsPk[k, dof, i] * basisvals[k, dof2, i]
-                    end
+					for k ∈ 1:ncomponents
+						temp += basisvalsPk[k, dof, i] * basisvals[k, dof2, i]
+					end
 					IMM_face[dof, dof2] += temp * xCellVolumes[cell] * qf.w[i]
 				end
 			end
@@ -153,29 +153,29 @@ function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{T
 end
 
 # only normalfluxes on faces
-function get_basis(::Union{Type{<:ON_FACES}, Type{<:ON_BFACES}}, ::Type{<:HDIVRTk{2,order}}, ::Type{<:AbstractElementGeometry1D}) where {order}
-    moments_weights = basis.(ShiftedLegendre, (0:order))
+function get_basis(::Union{Type{<:ON_FACES}, Type{<:ON_BFACES}}, ::Type{<:HDIVRTk{2, order}}, ::Type{<:AbstractElementGeometry1D}) where {order}
+	moments_weights = basis.(ShiftedLegendre, (0:order))
 	function closure(refbasis, xref)
 		refbasis[1, 1] = 1
-        for j = 1 : order
-            refbasis[j+1, 1] = (2*j+1) * moments_weights[j+1](xref[1])
-        end
+		for j ∈ 1:order
+			refbasis[j+1, 1] = (2 * j + 1) * moments_weights[j+1](xref[1])
+		end
 	end
 end
 
 function get_basis(::Type{ON_CELLS}, ::Type{HDIVRTk{2, order}}, ::Type{<:Triangle2D}) where {order}
-    if order == 1
-        interior_basis = get_basis(ON_CELLS, L2P0{1}, Triangle2D)
-        ninterior = 1
-    elseif order > 0
-        interior_basis = get_basis(ON_CELLS, H1Pk{1, 2, order - 1}, Triangle2D)
-        ninterior = Int((order+1)*(order)/2)
-    else
-        ninterior = 0
-    end
-    interior_offset = 3*(order+1)
-    moments_weights = basis.(ShiftedLegendre, (0:order))
-    moment_factors = [convert(Polynomial, m).coeffs[end] for m in moments_weights]
+	if order == 1
+		interior_basis = get_basis(ON_CELLS, L2P0{1}, Triangle2D)
+		ninterior = 1
+	elseif order > 0
+		interior_basis = get_basis(ON_CELLS, H1Pk{1, 2, order - 1}, Triangle2D)
+		ninterior = Int((order + 1) * (order) / 2)
+	else
+		ninterior = 0
+	end
+	interior_offset = 3 * (order + 1)
+	moments_weights = basis.(ShiftedLegendre, (0:order))
+	moment_factors = [convert(Polynomial, m).coeffs[end] for m in moments_weights]
 	function closure(refbasis, xref)
 		# RT0 basis
 		refbasis[1, 1] = xref[1]
@@ -185,20 +185,20 @@ function get_basis(::Type{ON_CELLS}, ::Type{HDIVRTk{2, order}}, ::Type{<:Triangl
 		refbasis[3+2*order, 1] = xref[1] - 1
 		refbasis[3+2*order, 2] = xref[2]
 		for k ∈ 1:2
-            for j = 1 : order
-                refbasis[1+j, k] = (-1)^j * (2*j+1) * moments_weights[j+1](1 - xref[1] - xref[2]) * refbasis[1, k]
-                refbasis[2+j+order, k] = (-1)^j * (2*j+1) * moments_weights[j+1](xref[1]) * refbasis[2+order, k]
-                refbasis[3+j+2*order, k] = (-1)^j * (2*j+1) * moments_weights[j+1](xref[2]) * refbasis[3+2*order, k]
-            end
-            
+			for j ∈ 1:order
+				refbasis[1+j, k] = (-1)^j * (2 * j + 1) * moments_weights[j+1](1 - xref[1] - xref[2]) * refbasis[1, k]
+				refbasis[2+j+order, k] = (-1)^j * (2 * j + 1) * moments_weights[j+1](xref[1]) * refbasis[2+order, k]
+				refbasis[3+j+2*order, k] = (-1)^j * (2 * j + 1) * moments_weights[j+1](xref[2]) * refbasis[3+2*order, k]
+			end
+
 			# interior RT2 functions (RT1 interior functions times P1) = 6 dofs
-            if order > 0
-                interior_basis(view(refbasis,interior_offset+ninterior+1:interior_offset+2*ninterior,2), xref)
-                for j = 1 : ninterior
-                    refbasis[interior_offset+j, k] = 12 * xref[2] * refbasis[1, k] * refbasis[interior_offset+ninterior+j, 2]
-                    refbasis[interior_offset+ninterior+j, k] = 12 * xref[1] * refbasis[3+2*order, k] * refbasis[interior_offset+ninterior+j, 2]
-                end
-            end
+			if order > 0
+				interior_basis(view(refbasis, interior_offset+ninterior+1:interior_offset+2*ninterior, 2), xref)
+				for j ∈ 1:ninterior
+					refbasis[interior_offset+j, k] = 12 * xref[2] * refbasis[1, k] * refbasis[interior_offset+ninterior+j, 2]
+					refbasis[interior_offset+ninterior+j, k] = 12 * xref[1] * refbasis[3+2*order, k] * refbasis[interior_offset+ninterior+j, 2]
+				end
+			end
 		end
 	end
 end
@@ -213,11 +213,11 @@ function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRTk{2, ord
 		# multiplication with normal vector signs (only RT0, RT2, RT4 etc.)
 		for j ∈ 1:nfaces, k ∈ 1:dim
 			coefficients[k, (order+1)*j-order] = xCellFaceSigns[j, cell]
-            for o = 2 : order
-                if iseven(o)
-			        coefficients[k, (order+1)*j-(order-o)] = xCellFaceSigns[j, cell]
-                end
-            end
+			for o ∈ 2:order
+				if iseven(o)
+					coefficients[k, (order+1)*j-(order-o)] = xCellFaceSigns[j, cell]
+				end
+			end
 		end
 		return nothing
 	end

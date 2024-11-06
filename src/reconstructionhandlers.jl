@@ -2,6 +2,13 @@
 
 ################## SPECIAL INTERPOLATORS ####################
 
+"""
+$(TYPEDSIGNATURES)
+
+produces a matrix representation for the interpolation
+of H1Pk (currently only up to order 4, only in 2D) 
+into HDIVRT0
+"""
 function interpolator_matrix(::Type{<:HDIVRT0{ncomponents}}, V1::FESpace{Tv, Ti, H1Pk{ncomponents, edim, order}, ON_CELLS}) where {Tv, Ti, ncomponents, edim, order}
 
 	@assert order in 1:4 "higher order H1PK->RT0 interpolator not yet implemented"
@@ -45,11 +52,25 @@ function interpolator_matrix(::Type{<:HDIVRT0{ncomponents}}, V1::FESpace{Tv, Ti,
 end
 
 
+"""
+$(TYPEDEF)
 
-
+abstract grid component type for storing reconstruction coefficients
+"""
 abstract type ReconstructionCoefficients{FE1, FE2, AT} <: AbstractGridFloatArray2D end
+
+"""
+$(TYPEDEF)
+
+abstract grid component type for storing reconstruction dof numbers
+"""
 abstract type ReconstructionDofs{FE1, FE2, AT} <: AbstractGridIntegerArray2D end
 
+"""
+$(TYPEDEF)
+
+struct for storing information needed to evaluate a reconstruction operator
+"""
 struct ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}
 	FES::FESpace{Tv, Ti, FE1, ON_CELLS}
 	FER::FESpace{Tv, Ti, FE2, ON_CELLS}
@@ -62,6 +83,13 @@ struct ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}
 	interior_coefficients::Matrix{Tv} # coefficients for interior basis functions are precomputed
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+generates a reconstruction handler
+returns the local coefficients need to evaluate a reconstruction operator
+of one finite element space into another
+"""
 function ReconstructionHandler(FES::FESpace{Tv, Ti, FE1, APT}, FES_Reconst::FESpace{Tv, Ti, FE2, APT}, AT, EG) where {Tv, Ti, FE1, FE2, APT}
 	xgrid = FES.xgrid
 	interior_offset = interior_dofs_offset(AT, FE2, EG)
@@ -79,6 +107,12 @@ function ReconstructionHandler(FES::FESpace{Tv, Ti, FE1, APT}, FES_Reconst::FESp
 	return ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}(FES, FES_Reconst, xFaceVolumes, xFaceNormals, xCellFaceOrientations, xCellFaces, interior_offset, interior_ndofs, coeffs)
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+caller function to extract the coefficients of the reconstruction
+on an item
+"""
 function get_rcoefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, item) where {Tv, Ti, FE1, FE2, AT, EG}
 	boundary_coefficients!(coefficients, RH, item)
 	for dof ∈ 1:size(coefficients, 1), k ∈ 1:RH.interior_ndofs
@@ -87,7 +121,11 @@ function get_rcoefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1,
 	return nothing
 end
 
-# interior coefficients for P2B > RT1/BDM2 reconstruction
+"""
+$(TYPEDSIGNATURES)
+
+generates the interior coefficients for the RT1 reconstruction of P2B
+"""
 function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tv, Ti}, ::Type{ReconstructionCoefficients{FE1, FE2, AT}}) where {Tv, Ti, FE1 <: H1P2B{2, 2}, FE2 <: HDIVRT1{2}, AT <: ON_CELLS}
 	@info "Computing interior reconstruction coefficients for $FE1 > $FE2 ($AT)"
 	xCellFaces = xgrid[CellFaces]
@@ -209,6 +247,11 @@ function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tv, Ti}, ::Type{Recon
 	interior_coefficients
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the interior coefficients for the BDM2 reconstruction of P2B
+"""
 function ExtendableGrids.instantiate(xgrid::ExtendableGrid{Tv, Ti}, ::Type{ReconstructionCoefficients{FE1, FE2, AT}}) where {Tv, Ti, FE1 <: H1P2B{2, 2}, FE2 <: HDIVBDM2{2}, AT <: ON_CELLS}
 	@info "Computing interior reconstruction coefficients for $FE1 > $FE2 ($AT)"
 	xCellFaces = xgrid[CellFaces]
@@ -380,6 +423,11 @@ end
 
 ##### BOUNDARY COEFFICIENTS #####
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the boundarycoefficients for the RT0 reconstruction of CR
+"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, <:H1CR{ncomponents}, <:HDIVRT0{ncomponents}, <:ON_CELLS, EG}, cell) where {Tv, Ti, ncomponents, EG}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -398,6 +446,11 @@ end
 
 const _P1_INTO_BDM1_COEFFS = [-1 // 12, 1 // 12]
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the boundarycoefficients for the BDM1 reconstruction of BR in two dimensions
+"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{2}, FE2 <: HDIVBDM1{2}, AT <: ON_CELLS, EG <: Union{Triangle2D, Quadrilateral2D}}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -426,6 +479,11 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 	return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the boundarycoefficients for the RT0 reconstruction of BR in two dimensions
+"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{2}, FE2 <: HDIVRT0{2}, AT <: ON_CELLS, EG <: Union{Triangle2D, Quadrilateral2D}}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -450,6 +508,11 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 	return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the boundarycoefficients for the RT1 reconstruction of P2B in two dimensions
+"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1P2B{2, 2}, FE2 <: HDIVRT1{2}, AT <: ON_CELLS, EG <: Triangle2D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -481,6 +544,11 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 	return nothing
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the boundarycoefficients for the BDM2 reconstruction of P2B in two dimensions
+"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1P2B{2, 2}, FE2 <: HDIVBDM2{2}, AT <: ON_CELLS, EG <: Triangle2D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -519,6 +587,11 @@ function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, 
 end
 
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the boundarycoefficients for the RT0 reconstruction of BR in three dimensions
+"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{3}, FE2 <: HDIVRT0{3}, AT <: ON_CELLS, EG <: Tetrahedron3D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals
@@ -544,6 +617,11 @@ end
 
 const _P1_INTO_BDM1_COEFFS_3D = [-1//36 -1//36 1//18; -1//36 1//18 -1//36; 1//18 -1//36 -1//36]
 
+"""
+$(TYPEDSIGNATURES)
+
+generates the boundarycoefficients for the BDM1 reconstruction of BR in three dimensions
+"""
 function boundary_coefficients!(coefficients, RH::ReconstructionHandler{Tv, Ti, FE1, FE2, AT, EG}, cell) where {Tv, Ti, FE1 <: H1BR{3}, FE2 <: HDIVBDM1{3}, AT <: ON_CELLS, EG <: Tetrahedron3D}
 	xFaceVolumes = RH.xFaceVolumes
 	xFaceNormals = RH.xFaceNormals

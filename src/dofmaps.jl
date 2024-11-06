@@ -9,35 +9,35 @@ abstract type DofMap <: AbstractGridAdjacency end
 
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each cell of the dofgrid
 """
 abstract type CellDofs <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each face of the dofgrid
 """
 abstract type FaceDofs <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each edge of the dofgrid
 """
 abstract type EdgeDofs <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each boundary face of the dofgrid
 """
 abstract type BFaceDofs <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each boundary edge of the dofgrid
 """
@@ -45,80 +45,125 @@ abstract type BEdgeDofs <: DofMap end
 
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each cell of the parentgrid
 """
 abstract type CellDofsParent <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each face of the parentgrid
 """
 abstract type FaceDofsParent <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each edge of the parentgrid
 """
 abstract type EdgeDofsParent <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each boundary face of the parentgrid
 """
 abstract type BFaceDofsParent <: DofMap end
 
 """
-    $(TYPEDEF)
+	$(TYPEDEF)
 
 Key type describing the dofs for each boundary edge of the parentgrid
 """
 abstract type BEdgeDofsParent <: DofMap end
 
+"""
+	$(TYPEDEF)
+
+Union type for all dofmap adjacency types.
+"""
 const DofMapTypes{Ti} = Union{VariableTargetAdjacency{Ti}, SerialVariableTargetAdjacency{Ti}, Array{Ti, 2}}
 
+"""
+$(TYPEDSIGNATURES)
+Unique geometry grid component for dofmaps
+"""
 UCG4DofMap(::Type{CellDofs}) = UniqueCellGeometries
 UCG4DofMap(::Type{FaceDofs}) = UniqueFaceGeometries
 UCG4DofMap(::Type{EdgeDofs}) = UniqueEdgeGeometries
 UCG4DofMap(::Type{BFaceDofs}) = UniqueBFaceGeometries
 UCG4DofMap(::Type{BEdgeDofs}) = UniqueBEdgeGeometries
 
+
+"""
+$(TYPEDSIGNATURES)
+ItemNodes grid component for dofmaps
+"""
 SuperItemNodes4DofMap(::Type{CellDofs}) = CellNodes
 SuperItemNodes4DofMap(::Type{FaceDofs}) = FaceNodes
 SuperItemNodes4DofMap(::Type{EdgeDofs}) = EdgeNodes
 SuperItemNodes4DofMap(::Type{BFaceDofs}) = FaceNodes
 SuperItemNodes4DofMap(::Type{BEdgeDofs}) = EdgeNodes
 
+"""
+$(TYPEDSIGNATURES)
+ItemGeomtries grid component for dofmaps
+"""
 ItemGeometries4DofMap(::Type{CellDofs}) = CellGeometries
 ItemGeometries4DofMap(::Type{FaceDofs}) = FaceGeometries
 ItemGeometries4DofMap(::Type{EdgeDofs}) = EdgeGeometries
 ItemGeometries4DofMap(::Type{BFaceDofs}) = BFaceGeometries
 ItemGeometries4DofMap(::Type{BEdgeDofs}) = BEdgeGeometries
 
+"""
+$(TYPEDSIGNATURES)
+ItemEdges grid component for dofmaps
+"""
 ItemEdges4DofMap(::Type{CellDofs}) = CellEdges
 ItemEdges4DofMap(::Type{FaceDofs}) = FaceEdges
 ItemEdges4DofMap(::Type{BFaceDofs}) = FaceEdges
 
+"""
+$(TYPEDSIGNATURES)
+SubItemEdges grid component for dofmaps
+"""
 Sub2Sup4DofMap(::Type{<:DofMap}) = nothing
 Sub2Sup4DofMap(::Type{BFaceDofs}) = BFaceFaces
 Sub2Sup4DofMap(::Type{BEdgeDofs}) = BEdgeEdges
 
+
+"""
+$(TYPEDSIGNATURES)
+Default Dofmap for AssemblyType
+"""
 Dofmap4AssemblyType(::Type{ON_CELLS}) = CellDofs
 Dofmap4AssemblyType(::Type{<:ON_FACES}) = FaceDofs
 Dofmap4AssemblyType(::Type{ON_BFACES}) = BFaceDofs
 Dofmap4AssemblyType(::Type{<:ON_EDGES}) = EdgeDofs
 Dofmap4AssemblyType(::Type{ON_BEDGES}) = BEdgeDofs
 
+"""
+$(TYPEDSIGNATURES)
+Parent Dofmap for Dofmap
+"""
 ParentDofmap4Dofmap(::Type{CellDofs}) = CellDofsParent
 ParentDofmap4Dofmap(::Type{FaceDofs}) = FaceDofsParent
 ParentDofmap4Dofmap(::Type{EdgeDofs}) = EdgeDofsParent
 ParentDofmap4Dofmap(::Type{BFaceDofs}) = BFaceDofsParent
 ParentDofmap4Dofmap(::Type{BEdgeDofs}) = BEdgeDofsParent
 
+"""
+$(TYPEDSIGNATURES)
+Effective AssemblyType (on the subgrid)
+for two AssemblyTypes where the first one
+is related to where the finite element functions live and the second one
+to where something should be assembled both with respect to the common parent grid
+(e.g. face-based finite elements live on a subgrid of all faces, where the faces
+are the cells in this subgrid, and they cannot be evaluated over the cells of the parentgrid,
+but on the faces of the parengrid, which are the cells in the subgrid)
+"""
 EffAT4AssemblyType(::Type{ON_CELLS}, ::Type{ON_CELLS}) = ON_CELLS
 EffAT4AssemblyType(::Type{ON_CELLS}, ::Type{<:ON_FACES}) = ON_FACES
 EffAT4AssemblyType(::Type{ON_CELLS}, ::Type{ON_BFACES}) = ON_BFACES
@@ -141,13 +186,52 @@ EffAT4AssemblyType(::Type{ON_EDGES}, ::Type{<:ON_FACES}) = nothing
 EffAT4AssemblyType(::Type{ON_EDGES}, ::Type{<:ON_EDGES}) = ON_CELLS
 
 
+"""
+	$(TYPEDEF)
+
+Abstrat type for all dof types
+"""
 abstract type DofType end
+
+"""
+	$(TYPEDEF)
+
+Dof connected to a single vertex
+"""
 abstract type DofTypeNode <: DofType end        # parsed from 'N' or 'n' (nodal continuous dof)
+
+"""
+	$(TYPEDEF)
+
+Dof connected to a face
+"""
 abstract type DofTypeFace <: DofType end        # parsed from 'F' or 'f' (face continuous dof)
+
+"""
+	$(TYPEDEF)
+
+Dof connected to an edge
+"""
 abstract type DofTypeEdge <: DofType end        # parsed from 'E' or 'e' (edge continuous dof)
+
+"""
+	$(TYPEDEF)
+
+Dof connected to the interior of an item
+"""
 abstract type DofTypeInterior <: DofType end    # parsed from 'I' or 'i' (interior dof)
+
+"""
+	$(TYPEDEF)
+
+Dof connected to a parent cell
+"""
 abstract type DofTypePCell <: DofType end       # parsed from 'C' or 'c' (parent cell dof, only needed by P0 element for BFaceDofs)
 
+"""
+$(TYPEDSIGNATURES)
+parses a Char into a DofType
+"""
 function DofType(c::Char)
 	if lowercase(c) == 'n'
 		return DofTypeNode
@@ -167,13 +251,24 @@ end
 const dofmap_type_chars = ['E', 'N', 'I', 'C', 'F', 'e', 'n', 'i', 'c', 'f']
 const dofmap_number_chars = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
 
+
+"""
+	$(TYPEDEF)
+
+Pattern segment of a dofmap sequence
+"""
 struct DofMapPatternSegment
 	type::Type{<:DofType}
 	each_component::Bool    # single dof for all components or one for each component ?
 	ndofs::Int              # how many dofs 
 end
 
-# splits pattern into pairs of single chars and Ints
+
+"""
+$(TYPEDSIGNATURES)
+splits a pattern string into pairs of single chars and Ints
+and generated a sequence of DofMapPatternSegments
+"""
 function parse_pattern(pattern::String)
 	pairs = Array{DofMapPatternSegment, 1}([])
 	for j ∈ 1:length(pattern)
@@ -194,6 +289,12 @@ function parse_pattern(pattern::String)
 end
 
 
+
+"""
+	$(TYPEDEF)
+
+Parsed dofmap, basically a sequence of DofMapPatternSegment
+"""
 struct ParsedDofMap
 	segments::Array{DofMapPatternSegment, 1}
 	ndofs_node4c::Int
@@ -209,11 +310,20 @@ struct ParsedDofMap
 	ndofs_total::Int
 end
 
+"""
+$(TYPEDSIGNATURES)
+total number of dofs of the DofType for a single component
+"""
 get_ndofs4c(P::ParsedDofMap, ::Type{DofTypeNode}) = P.ndofs_node4c
 get_ndofs4c(P::ParsedDofMap, ::Type{DofTypeEdge}) = P.ndofs_edge4c
 get_ndofs4c(P::ParsedDofMap, ::Type{DofTypeFace}) = P.ndofs_face4c
 get_ndofs4c(P::ParsedDofMap, ::Type{DofTypeInterior}) = P.ndofs_interior4c
 get_ndofs4c(P::ParsedDofMap, ::Type{DofTypePCell}) = P.ndofs_pcell4c
+
+"""
+$(TYPEDSIGNATURES)
+total number of dofs of the DofType
+"""
 get_ndofs(P::ParsedDofMap, ::Type{DofTypeNode}) = P.ndofs_node
 get_ndofs(P::ParsedDofMap, ::Type{DofTypeEdge}) = P.ndofs_edge
 get_ndofs(P::ParsedDofMap, ::Type{DofTypeFace}) = P.ndofs_face
@@ -221,6 +331,12 @@ get_ndofs(P::ParsedDofMap, ::Type{DofTypeInterior}) = P.ndofs_interior
 get_ndofs(P::ParsedDofMap, ::Type{DofTypePCell}) = P.ndofs_pcell
 get_ndofs(P::ParsedDofMap) = P.ndofs_total
 
+"""
+$(TYPEDSIGNATURES)
+parses a dofmap string (defined in each finite element definition file)
+and generated a ParsedDofMap for a certain number of components
+and the given geometry
+"""
 function ParsedDofMap(pattern::String, ncomponents, EG::Type{<:AbstractElementGeometry})
 	segments = parse_pattern(pattern)
 	ndofs_node::Int = 0
@@ -266,10 +382,20 @@ function ParsedDofMap(pattern::String, ncomponents, EG::Type{<:AbstractElementGe
 end
 
 
+"""
+$(TYPEDSIGNATURES)
+yields the coressponding dofmap of the FESpace for a given AssemblyType (assumed with respect to the
+(parent)grid of the FESpace)
+"""
 function Dofmap4AssemblyType(FES::FESpace, AT::Type{<:AssemblyType})
 	return FES[Dofmap4AssemblyType(EffAT4AssemblyType(assemblytype(FES), AT))]
 end
 
+
+"""
+$(TYPEDSIGNATURES)
+generates the DofMap for the FESpace based on the pattern of the FEType 
+"""
 function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<:DofMap}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
 	## Beware: Automatic broken DofMap generation currently only reliable for CellDofs
 
@@ -465,9 +591,9 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
 		end
 		DMP = ParentDofmap4Dofmap(DM)
 		subitem = 1
-		for i = 1 : num_sources(xItemDofs)
+		for i ∈ 1:num_sources(xItemDofs)
 			t = parentitems[i]
-			for j = subitem : t-1
+			for j ∈ subitem:t-1
 				append!(xItemDofsLifted, [])
 				subitem += 1
 			end
@@ -481,6 +607,10 @@ function init_dofmap_from_pattern!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Type{<
 end
 
 
+"""
+$(TYPEDSIGNATURES)
+generates the BFaceDofs or FaceDofs DofMap for a broken FESpace based on the pattern of the FEType 
+"""
 function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{BFaceDofs}, Type{FaceDofs}}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
 
 	## prepare dofmap patterns
@@ -695,6 +825,10 @@ function init_broken_dofmap!(FES::FESpace{Tv, Ti, FEType, APT}, DM::Union{Type{B
 end
 
 
+"""
+$(TYPEDSIGNATURES)
+generates the requested DofMap for the FESpace
+"""
 function init_dofmap!(FES::FESpace, DM::Type{<:DofMap})
 	@debug "Generating dofmap $DM for FESpace $(FES.name)"
 
@@ -710,15 +844,19 @@ end
 
 
 
+"""
+$(TYPEDSIGNATURES)
+returns an array with the number of all dofs associated to a boundary dofmap
+(default: BFaceDofs) and certain boundary regions (default: all regions)
+"""
 function boundarydofs(FES; dofmap = BFaceDofs, regions = :all)
-
 	bitemdofs = FES[dofmap]
 	if regions === :all
 		if typeof(bitemdofs) <: VariableTargetAdjacency
 			return bitemdofs.colentries
 		elseif typeof(bitemdofs) <: SerialVariableTargetAdjacency
 			return 1:bitemdofs.colstart[end]-1
-		else 
+		else
 			@error "dofmap has unexpected type"
 		end
 	else

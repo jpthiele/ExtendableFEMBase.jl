@@ -12,16 +12,26 @@
 """
 $(TYPEDEF)
 
-A struct that contains the name of the quadrature rule, the reference points and the weights for the parameter-determined element geometry.
+Abstract type for quadrature rules for a certain NumberType and element geometry
 """
 abstract type QuadratureRule{T <: Real, ET <: AbstractElementGeometry} end
 
+"""
+$(TYPEDEF)
+
+A struct that contains the name of the quadrature rule, the reference points and the weights for the parameter-determined element geometry.
+"""
 struct SQuadratureRule{T <: Real, ET <: AbstractElementGeometry, dim, npoints} <: QuadratureRule{T, ET}
 	name::String
 	xref::Array{Vector{T}, 1}
 	w::Array{T, 1}
 end
 
+"""
+$(TYPEDSIGNATURES)
+
+constructor that puts the provided xref and weights w into a quadrature rule
+"""
 function QuadratureRule{T, ET}(xref, w; name = "N.N.") where {T, ET}
 	return SQuadratureRule{T, ET, dim_element(ET), length(w)}(name, xref, w)
 end
@@ -47,9 +57,15 @@ function Base.show(io::IO, Q::QuadratureRule{T, ET} where {T <: Real, ET <: Abst
 	println("  npoints : $(npoints) ($(eltype(Q)[1]))")
 end
 
-# sets up a quadrature rule that evaluates at vertices of element geometry
-# not optimal from quadrature point of view, but helpful when interpolating
-# order of xref matches dof order of H1Pk element
+
+
+"""
+$(TYPEDSIGNATURES)
+
+sets up a quadrature rule that evaluates at vertices of element geometry;
+not optimal from quadrature point of view, but helpful when interpolating.
+Note, that order of xref matches dof order of H1Pk element
+"""
 function VertexRule(ET::Type{Edge1D}, order = 1; T = Float64)
 	if order == 0
 		xref = [[1 // 2]]

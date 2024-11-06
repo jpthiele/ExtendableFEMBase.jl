@@ -23,7 +23,7 @@ struct FEMatrixBlock{TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY} <: Abstra
 end
 
 function Base.copy(FEMB::FEMatrixBlock{TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY}, entries) where {TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY}
-    return FEMatrixBlock{TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY}(deepcopy(FEMB.name), copy(FEMB.FES), copy(FEMB.FESY), FEMB.offset, FEMB.offsetY, FEMB.last_index, FEMB.last_indexY, entries)
+	return FEMatrixBlock{TvM, TiM, TvG, TiG, FETypeX, FETypeY, APTX, APTY}(deepcopy(FEMB.name), copy(FEMB.FES), copy(FEMB.FESY), FEMB.offset, FEMB.offsetY, FEMB.last_index, FEMB.last_indexY, entries)
 end
 
 function Base.show(io::IO, FEB::FEMatrixBlock; tol = 1e-14)
@@ -55,24 +55,32 @@ struct FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} <: AbstractSparseMatr
 end
 
 function Base.copy(FEV::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}
-    entries = deepcopy(FEV.entries)
-    return FEVector{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}([copy(B, entries) for B in FEV.FEMatrixBlocks], entries)
+	entries = deepcopy(FEV.entries)
+	return FEVector{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}([copy(B, entries) for B in FEV.FEMatrixBlocks], entries)
 end
 
-#Add value to matrix if it is nonzero
+
+"""
+$(TYPEDEF)
+
+adds value v to matrix at position (i,j) if it is nonzero
+"""
 @inline function _addnz(ESM::AbstractExtendableSparseMatrixCSC, i, j, v::Tv, fac, part = 1) where Tv
 	if v != zero(Tv)
 		rawupdateindex!(ESM, +, v * fac, i, j, part)
 	end
 end
-
-#Add value to matrix if it is nonzero
 @inline function _addnz(FEB::FEMatrixBlock, i, j, v::Tv, fac, part = 1) where Tv
 	if v != zero(Tv)
 		rawupdateindex!(FEB.entries, +, v * fac, FEB.offset + i, FEB.offsetY + j, part)
 	end
 end
 
+"""
+$(TYPEDEF)
+
+pre-allocates the expected pattern for the default dofmaps for the AssemblyType
+"""
 function apply_nonzero_pattern!(B::FEMatrixBlock, AT::Type{<:AssemblyType})
 	dofmapX = Dofmap4AssemblyType(B.FESX, AT)
 	dofmapY = Dofmap4AssemblyType(B.FESY, AT)
@@ -85,7 +93,7 @@ function apply_nonzero_pattern!(B::FEMatrixBlock, AT::Type{<:AssemblyType})
 end
 
 Base.getindex(FEF::FEMatrix, i) = FEF.FEMatrixBlocks[i]
-Base.getindex(FEF::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}, tagX, tagY) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} = (index = findfirst(==((tagX,tagY)), FEF.tags); return FEF.FEMatrixBlocks[(index[1]-1)*nbcol+index[2]] )
+Base.getindex(FEF::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}, tagX, tagY) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} = (index = findfirst(==((tagX, tagY)), FEF.tags); return FEF.FEMatrixBlocks[(index[1]-1)*nbcol+index[2]])
 Base.getindex(FEF::FEMatrix{TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal}, i::Int, j::Int) where {TvM, TiM, TvG, TiG, nbrow, nbcol, nbtotal} = FEF.FEMatrixBlocks[(i-1)*nbcol+j]
 Base.getindex(FEB::FEMatrixBlock, i::Int, j::Int) = FEB.entries[FEB.offset+i, FEB.offsetY+j]
 Base.getindex(FEB::FEMatrixBlock, i::Any, j::Any) = FEB.entries[FEB.offset.+i, FEB.offsetY.+j]
@@ -254,7 +262,7 @@ function FEMatrix{TvM, TiM}(FESX::Array{<:FESpace{TvG, TiG}, 1}, FESY::Array{<:F
 	if (tagsX !== nothing) && (tagsY !== nothing)
 		tagmatrix = [(j, k) for j in tagsX, k in tagsY]
 	else
-		tagmatrix = zeros(Int,0,0)
+		tagmatrix = zeros(Int, 0, 0)
 	end
 	return FEMatrix{TvM, TiM, TvG, TiG, length(FESX), length(FESY), length(FESX) * length(FESY)}(Blocks, entries, tagmatrix)
 end
@@ -399,6 +407,12 @@ function addblock!(A::FEMatrixBlock{Tv}, cscmat::SparseArrays.SparseMatrixCSC{Tv
 	return nothing
 end
 
+
+"""
+$(TYPEDSIGNATURES)
+
+sets penalty to the diagonal entries of fixed_dofs in A
+"""
 function apply_penalties!(A::AbstractExtendableSparseMatrixCSC, fixed_dofs, penalty)
 	for dof in fixed_dofs
 		A[dof, dof] = penalty
@@ -603,15 +617,19 @@ function ldrdmatmul(a1::AbstractVector{Tv}, a2::AbstractVector{Tv}, B::AbstractE
 end
 
 
-function submatrix(A::AbstractExtendableSparseMatrixCSC{Tv,Ti}, srows, scols) where {Tv,Ti}
+"""
+$(TYPEDSIGNATURES)
+
+Generates an ExtendableSparseMatrix from the submatrix
+for the given row and col numbers
+"""
+function submatrix(A::AbstractExtendableSparseMatrixCSC{Tv, Ti}, srows, scols) where {Tv, Ti}
 	cscmat::SparseMatrixCSC{Tv, Ti} = A.cscmatrix
-	valsA::Array{Tv, 1} = cscmat.nzval
 	rows::Array{Ti, 1} = rowvals(cscmat)
-	result = 0.0
-	S = ExtendableSparseMatrix{Tv,Ti}(length(srows), length(scols))
+	S = ExtendableSparseMatrix{Tv, Ti}(length(srows), length(scols))
 	@assert maximum(srows) <= size(A, 1) "rows exceeds rowcount of A"
 	@assert maximum(scols) <= size(A, 2) "cols exceeds colcount of A"
-	for col = 1 : length(scols)
+	for col ∈ 1:length(scols)
 		scol = scols[col]
 		for r in nzrange(cscmat, scol)
 			j = findfirst(==(rows[r]), srows)
