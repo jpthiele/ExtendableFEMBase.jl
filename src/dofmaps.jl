@@ -189,7 +189,7 @@ EffAT4AssemblyType(::Type{ON_EDGES}, ::Type{<:ON_EDGES}) = ON_CELLS
 """
 	$(TYPEDEF)
 
-Abstrat type for all dof types
+Abstract type for all dof types
 """
 abstract type DofType end
 

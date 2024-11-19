@@ -108,7 +108,7 @@ function ensure_moments!(target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType
 	xItemDofs::DofMapTypes{Ti} = Dofmap4AssemblyType(FE, AT)
 	EGs = xgrid[GridComponentUniqueGeometries4AssemblyType(AT)]
 
-	bestapprox::Bool = false # if true interior dofs are set acoording to a constrained bestapproximation, otherwise to preserve the moments up to order, might become a kwarg later
+	bestapprox::Bool = false # if true interior dofs are set according to a constrained bestapproximation, otherwise to preserve the moments up to order, might become a kwarg later
 
 	@assert length(EGs) == 1 "ensure_moments! currently only works with grids with a single element geometry"
 	EG = EGs[1]
@@ -292,7 +292,7 @@ function ExtendableGrids.interpolate!(target::FEVectorBlock,
 ````
 
 Interpolates the given source into the finite elements space assigned to the target FEVectorBlock with the specified AssemblyType
-(usualy ON_CELLS). 
+(usually ON_CELLS). 
 
 The source functions should adhere to the interface
 ```julia
@@ -301,7 +301,7 @@ The source functions should adhere to the interface
 The qpinfo argument communicates vast information of the current quadrature/evaluation point.
 
 The bonus_quadorder argument can be used to steer the quadrature order of integrals that needs to be computed
-for the interpolation (the default quadrature order corressponds to the polynomial order of the finite element).
+for the interpolation (the default quadrature order corresponds to the polynomial order of the finite element).
 """
 function ExtendableGrids.interpolate!(
 	target::FEVectorBlock{T, Tv, Ti},
@@ -312,7 +312,7 @@ function ExtendableGrids.interpolate!(
 
 	FEType = eltype(target.FES)
 	if target.FES.broken == true
-		## interpolate continously
+		## interpolate continuously
 		FESc = FESpace{FEType}(target.FES.dofgrid)
 		Targetc = FEVector{T}(FESc)
 		interpolate!(Targetc[1], FESc, AT, source; items = items, kwargs...)
@@ -358,7 +358,7 @@ The source functions should adhere to the interface
 The qpinfo argument communicates vast information of the current quadrature/evaluation point.
 
 The bonus_quadorder argument can be used to steer the quadrature order of integrals that needs to be computed
-for the interpolation (the default quadrature order corressponds to the polynomial order of the finite element).
+for the interpolation (the default quadrature order corresponds to the polynomial order of the finite element).
 """
 function ExtendableGrids.interpolate!(target::FEVectorBlock, source; kwargs...)
 	interpolate!(target, ON_CELLS, source; kwargs...)

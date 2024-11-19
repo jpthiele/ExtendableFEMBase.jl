@@ -140,7 +140,7 @@ function initialize!(O::PointEvaluator{T, UT}, sol; time = 0, kwargs...) where {
 			# update basis evaluations at xref
 			relocate_xref!(BE_args[id], xref)
 
-			# update operator eveluation on item
+			# update operator evaluation on item
 			update_basis!(BE_args[id], item)
 		end
 

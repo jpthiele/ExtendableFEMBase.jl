@@ -292,7 +292,7 @@ function solve_stokes_lowlevel(FES, μ, f!)
 	Alin = deepcopy(A) # = keep linear part of system matrix
 	blin = deepcopy(b) # = keep linear part of right-hand side
 	
-	println("Pepare boundary conditions...")
+	println("Prepare boundary conditions...")
 	@time begin
 		u_init = FEVector(FES)
 		interpolate!(u_init[1], u!; time = teval)

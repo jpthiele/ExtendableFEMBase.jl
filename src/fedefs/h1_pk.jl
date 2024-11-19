@@ -99,7 +99,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, H1Pk{ncomponen
 	end
 end
 
-## standard interpolation on cells = perserve cell moments up to order-3
+## standard interpolation on cells = preserve cell moments up to order-3
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, H1Pk{ncomponents, edim, order}, APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {ncomponents, edim, order, Tv, Ti, APT}
 	if edim == 2
 		# delegate cell faces to face interpolation
@@ -116,7 +116,7 @@ function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, H1Pk{ncomponen
 		#     subitems = slice(FE.dofgrid[CellEdges], items)
 		#     interpolate!(Target, FE, ON_EDGES, exact_function!; items = subitems, time = time)
 
-		#     # fixe face means
+		#     # fix face means
 
 		#     # fix cell bubble value by preserving integral mean
 		#     ensure_cell_moments!(Target, FE, exact_function!; facedofs = 1, edgedofs = 2, items = items, time = time)
@@ -194,7 +194,7 @@ function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents, edim, 
 	end
 	if order > 3 # use recursion to fill the interior dofs (+multiplication with cell bubble)
 		interior_basis = get_basis(ON_CELLS, H1Pk{1, edim, order - 3}, Triangle2D)
-		# todo: scaling factors for interior dofs (but may be ommited)
+		# todo: scaling factors for interior dofs (but may be omitted)
 	end
 	function closure(refbasis, xref)
 		fill!(refbasis, 0)
@@ -217,7 +217,7 @@ function get_basis(::Type{<:AssemblyType}, FEType::Type{H1Pk{ncomponents, edim, 
 		# edge basis functions
 		if order > 1
 			for k ∈ 1:order-1
-				# on each face find basis funktion that is 1 at s = k//order
+				# on each face find basis function that is 1 at s = k//order
 
 				# first face (nodes [1,2])
 				refbasis[3+k, 1] = refbasis[end] * xref[1] / factors_face[k]
