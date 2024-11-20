@@ -24,7 +24,7 @@ search. To activate this put 'use_cellparents' = true). By some given kernel fun
 the operator evaluation (=input) can be further postprocessed. The qpinfo argument
 allows to access information at the current quadrature point.
 
-Note: discontinuous quantities at vertices of the target grid will be evaluted in the first found cell of the
+Note: discontinuous quantities at vertices of the target grid will be evaluated in the first found cell of the
 source grid. No averaging is performed. With eps the tolerances of the cell search via ExtendableGrids.CellFinder can be steered.
 """
 function lazy_interpolate!(

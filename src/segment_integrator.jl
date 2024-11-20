@@ -17,7 +17,7 @@ segment_geometry(::SegmentIntegrator{Tv, UT, KFT, EG}) where {Tv, UT, KFT, EG} =
 default_segint_kwargs() = Dict{Symbol, Tuple{Any, String}}(
 	:name => ("SegmentIntegrator", "name for operator used in printouts"),
 	:resultdim => (0, "dimension of result field (default = length of arguments)"),
-	:matrix_mode => (false, "integrator integrates basis functions of FEspace seperately to assembly a matrix that maps solution to segment integrations (requires that kernel is linear)"),
+	:matrix_mode => (false, "integrator integrates basis functions of FEspace separately to assembly a matrix that maps solution to segment integrations (requires that kernel is linear)"),
 	:entry_tolerance => (0, "threshold to add entry to sparse matrix (only in matrix_mode)"),
 	:params => (nothing, "array of parameters that should be made available in qpinfo argument of kernel function"),
 	:factor => (1, "factor that should be multiplied during assembly"),
@@ -44,7 +44,7 @@ function SegmentIntegrator(
 	kwargs...)
 ````
 
-Generates an SegmentIntegrator that can intgrate over segments
+Generates an SegmentIntegrator that can integrate over segments
 of the specified geometry EG.
 To do so, it evaluates, at each quadrature point, the specified operator evaluations,
 postprocesses them with the kernel function (if provided)
@@ -105,7 +105,7 @@ function initialize!(O::SegmentIntegrator{T, UT}, sol; time = 0, kwargs...) wher
 	xgrid = FES_args[1].xgrid
 	itemregions = xgrid[CellRegions]
 
-	## prepare quadrature formuale
+	## prepare quadrature formulae
 	SG = segment_geometry(O)
 	EG = xgrid[UniqueCellGeometries][1]
 	dimfill = dim_element(EG) - dim_element(SG)

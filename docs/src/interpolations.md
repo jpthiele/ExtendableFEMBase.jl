@@ -17,7 +17,7 @@ The qpinfo argument communicates vast information of the current quadrature poin
 | qpinfo.region      | Integer            | region number of item |
 | qpinfo.xref        | Vector{Real}       | reference coordinates within item of qpinfo.x |
 | qpinfo.volume      | Real               | volume of item |
-| qpinfo.params      | Vector{Any}        | parameters that can be transfered via keyword arguments |
+| qpinfo.params      | Vector{Any}        | parameters that can be transferred via keyword arguments |
 
 
 ## Standard Interpolations

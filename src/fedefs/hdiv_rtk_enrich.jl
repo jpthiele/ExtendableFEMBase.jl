@@ -99,7 +99,7 @@ function get_basis(::Type{ON_CELLS}, ::Type{HDIVRTkENRICH{3, order, false}}, EG:
 		refbasis[3, 3] = 2 * xref[1] * xref[3]
 
 		if order == 1
-			# nothing to add (but enrichment need additional RT0 handled by seperate FESpace/FEVectorBlock)
+			# nothing to add (but enrichment need additional RT0 handled by separate FESpace/FEVectorBlock)
 		elseif order == 2
 			for k ∈ 1:3
 				refbasis[4, k] = (6 * (1 - xref[1] - xref[2] - xref[3]) - 1) * refbasis[3, k] + (6 * xref[1] - 1) * (-refbasis[1, k] - refbasis[2, k] - refbasis[3, k]) # (1,2)

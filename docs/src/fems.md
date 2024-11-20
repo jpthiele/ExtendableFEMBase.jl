@@ -41,7 +41,7 @@ AbstractFiniteElement
 
 #### Remarks
 - each type depends on one/two or three parameters, the first one is always the number of components (ncomponents) that determines if the
-  finite element is scalar- or veector-valued; some elements additionaly require the parameter edim <: Int if they are structurally different in different space dimensions; arbitrary order elements require a third parameter that determines the order
+  finite element is scalar- or veector-valued; some elements additionally require the parameter edim <: Int if they are structurally different in different space dimensions; arbitrary order elements require a third parameter that determines the order
 - each finite elements mainly comes with a set of basis functions in reference coordinates for each applicable AbstractElementGeometry and degrees of freedom maps for each mesh entity
 - broken finite elements are possible via the broken switch in the [FESpace](@ref) constructor
 - the type steers how the basis functions are transformed from local to global coordinates and how FunctionOperators are evaluated
@@ -54,7 +54,7 @@ AbstractFiniteElement
 
 ## List of implemented Finite Elements
 
-The following table lists all curently implemented finite elements and on which geometries they are available (in brackets a dofmap pattern for CellDofs is shown and the number of local degrees of freedom for a vector-valued realisation). Click on the FEType to find out more details.
+The following table lists all currently implemented finite elements and on which geometries they are available (in brackets a dofmap pattern for CellDofs is shown and the number of local degrees of freedom for a vector-valued realisation). Click on the FEType to find out more details.
 
 | FEType | Triangle2D | Parallelogram2D | Tetrahedron3D | Parallelepiped3D |
 | :----------------: | :----------------: |  :----------------: |  :----------------: |  :----------------: | 
@@ -93,7 +93,7 @@ Note: the dofmap pattern describes the connection of the local degrees of freedo
 
 ### P0 finite element
 
-Piecewise constant finite element that has one degree of freedom on each cell of the grid. (It is masked as a H1-conforming finite element, because it uses the same operator evaulations.)
+Piecewise constant finite element that has one degree of freedom on each cell of the grid. (It is masked as a H1-conforming finite element, because it uses the same operator evaluations.)
 
 The interpolation of a given function into this space preserves the cell integrals.
 
@@ -205,7 +205,7 @@ H1P3
 
 ### Pk finite element (experimental)
 
-The Pk finite element method generically generates polynomials of abitrary order k on simplices (Edge1D, Triangle2D so far).
+The Pk finite element method generically generates polynomials of arbitrary order k on simplices (Edge1D, Triangle2D so far).
 
 The interpolation of a given function into this space performs point evaluations at the nodes and preserves cell and face integrals in 2D (moment order depends on the order and the element dimension).
 

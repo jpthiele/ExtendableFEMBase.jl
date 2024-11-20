@@ -596,7 +596,7 @@ function get_generic_quadrature_Stroud(order::Int)
 	r = F.values
 	a = 2 * F.vectors[1, :] .^ 2
 
-	# compute 1D Gauss-Jacobi Points for Intervall [-1,1] and weights
+	# compute 1D Gauss-Jacobi Points for Interval [-1,1] and weights
 	delta = -1 ./ (4 .* (1:ngpts) .^ 2 .- ones(ngpts, 1))
 	gamma = sqrt.((2:ngpts) .* (1:ngpts-1)) ./ (2 .* (2:ngpts) .- ones(ngpts - 1, 1))
 	F = eigen(diagm(0 => delta[:], 1 => gamma[:], -1 => gamma[:]))

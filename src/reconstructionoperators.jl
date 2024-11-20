@@ -44,7 +44,7 @@ function FEEvaluator(
 	xgrid = FE.xgrid
 	FE2 = FESpace{FETypeReconst}(xgrid)
 
-	## collect dimension informations
+	## collect dimension information
 	ncomponents::Int = get_ncomponents(FEType)
 	ncomponents2::Int = get_ncomponents(FETypeReconst)
 	if AT <: Union{ON_BFACES, <:ON_FACES}
