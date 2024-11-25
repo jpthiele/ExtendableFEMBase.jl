@@ -255,5 +255,3 @@ HCURLN1
 ```@docs
 H1BUBBLE
 ```
-
-

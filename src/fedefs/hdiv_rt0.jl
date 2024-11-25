@@ -128,5 +128,3 @@ function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRT0, APT},
 		return nothing
 	end
 end
-
-

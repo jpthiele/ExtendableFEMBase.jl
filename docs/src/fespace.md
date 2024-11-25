@@ -27,4 +27,3 @@ The following DofMap subtypes are available and are used as keys to access the d
 | EdgeDofs           | degrees of freedom for each edge (in 3D)          | 
 | BFaceDofs          | degrees of freedom for each boundary face         |
 | BEdgeDofs          | degrees of freedom for each boundary edge (in 3D) |
-

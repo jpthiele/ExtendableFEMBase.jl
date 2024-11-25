@@ -76,4 +76,3 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Curl
 	end
 	return nothing
 end
-
