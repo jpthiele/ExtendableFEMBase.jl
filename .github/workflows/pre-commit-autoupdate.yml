@@ -1,0 +1,25 @@
+name: Pre-commit auto-update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  auto-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - name: install pre-commit
+        run: pip install pre-commit
+      - name: run autoupdate
+        run: pre-commit autoupdate
+      - name: create PR
+        uses: peter-evans/create-pull-request@v7
+        with: 
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: update/pre-commit-autoupdate
+          title: 'Auto-update pre-commit hooks'
+          commit-message: '[Dependencies] auto update pre-commit hook'
+          labels: dependencies
+          
