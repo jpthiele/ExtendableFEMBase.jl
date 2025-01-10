@@ -1,57 +1,57 @@
 """
 	ExtendableFEMBase
 
-$(read(joinpath(@__DIR__,"..","README.md"),String))
+$(read(joinpath(@__DIR__, "..", "README.md"), String))
 """
 module ExtendableFEMBase
 
 using DocStringExtensions: DocStringExtensions, TYPEDEF, TYPEDSIGNATURES
 using ExtendableGrids: ExtendableGrids, AT_NODES, AbstractElementGeometry,
-	AbstractElementGeometry0D, AbstractElementGeometry1D,
-	AbstractElementGeometry2D, AbstractElementGeometry3D,
-	AbstractGridAdjacency, AbstractGridComponent,
-	AbstractGridFloatArray2D, AbstractGridIntegerArray2D,
-	Adjacency, AssemblyType, BEdgeEdges, BEdgeGeometries,
-	BEdgeRegions, BEdgeVolumes, BFaceEdges, BFaceFaces,
-	BFaceGeometries, BFaceParents, BFaceRegions,
-	BFaceVolumes, CellEdgeSigns, CellEdges,
-	CellFaceOrientations, CellFaceSigns, CellFaces,
-	CellFinder, CellGeometries, CellNodes, CellParents,
-	CellRegions, CellVolumes, Coordinates, Edge1D,
-	EdgeCells, EdgeGeometries, EdgeNodes, EdgeTangents,
-	EdgeVolumes, ElementGeometries, ExtendableGrid,
-	FaceCells, FaceEdgeSigns, FaceEdges, FaceGeometries,
-	FaceNodes, FaceNormals, FaceParents, FaceRegions,
-	FaceVolumes, GridComponentGeometries4AssemblyType,
-	GridComponentNodes4AssemblyType,
-	GridComponentRegions4AssemblyType,
-	GridComponentUniqueGeometries4AssemblyType,
-	GridComponentVolumes4AssemblyType, GridEGTypes,
-	GridRegionTypes, Hexahedron3D, L2GTransformer,
-	ON_BEDGES, ON_BFACES, ON_CELLS, ON_EDGES, ON_FACES,
-	ON_IFACES, Parallelepiped3D, Parallelogram2D,
-	ParentGrid, ParentGridRelation, Quadrilateral2D,
-	SerialVariableTargetAdjacency, SubGrid, Tetrahedron3D,
-	Triangle2D, UniqueBEdgeGeometries,
-	UniqueBFaceGeometries, UniqueCellGeometries,
-	UniqueEdgeGeometries, UniqueFaceGeometries,
-	VariableTargetAdjacency, Vertex0D, append!, atranspose,
-	dim_element, eval_trafo!, gFindLocal!, interpolate!,
-	local_celledgenodes, local_cellfacenodes, mapderiv!,
-	max_num_targets_per_source, num_cells, num_edges,
-	num_faces, num_nodes, num_sources, num_targets,
-	reference_domain, subgrid, unique,
-	update_trafo!
+    AbstractElementGeometry0D, AbstractElementGeometry1D,
+    AbstractElementGeometry2D, AbstractElementGeometry3D,
+    AbstractGridAdjacency, AbstractGridComponent,
+    AbstractGridFloatArray2D, AbstractGridIntegerArray2D,
+    Adjacency, AssemblyType, BEdgeEdges, BEdgeGeometries,
+    BEdgeRegions, BEdgeVolumes, BFaceEdges, BFaceFaces,
+    BFaceGeometries, BFaceParents, BFaceRegions,
+    BFaceVolumes, CellEdgeSigns, CellEdges,
+    CellFaceOrientations, CellFaceSigns, CellFaces,
+    CellFinder, CellGeometries, CellNodes, CellParents,
+    CellRegions, CellVolumes, Coordinates, Edge1D,
+    EdgeCells, EdgeGeometries, EdgeNodes, EdgeTangents,
+    EdgeVolumes, ElementGeometries, ExtendableGrid,
+    FaceCells, FaceEdgeSigns, FaceEdges, FaceGeometries,
+    FaceNodes, FaceNormals, FaceParents, FaceRegions,
+    FaceVolumes, GridComponentGeometries4AssemblyType,
+    GridComponentNodes4AssemblyType,
+    GridComponentRegions4AssemblyType,
+    GridComponentUniqueGeometries4AssemblyType,
+    GridComponentVolumes4AssemblyType, GridEGTypes,
+    GridRegionTypes, Hexahedron3D, L2GTransformer,
+    ON_BEDGES, ON_BFACES, ON_CELLS, ON_EDGES, ON_FACES,
+    ON_IFACES, Parallelepiped3D, Parallelogram2D,
+    ParentGrid, ParentGridRelation, Quadrilateral2D,
+    SerialVariableTargetAdjacency, SubGrid, Tetrahedron3D,
+    Triangle2D, UniqueBEdgeGeometries,
+    UniqueBFaceGeometries, UniqueCellGeometries,
+    UniqueEdgeGeometries, UniqueFaceGeometries,
+    VariableTargetAdjacency, Vertex0D, append!, atranspose,
+    dim_element, eval_trafo!, gFindLocal!, interpolate!,
+    local_celledgenodes, local_cellfacenodes, mapderiv!,
+    max_num_targets_per_source, num_cells, num_edges,
+    num_faces, num_nodes, num_sources, num_targets,
+    reference_domain, subgrid, unique,
+    update_trafo!
 using ExtendableSparse: ExtendableSparse, ExtendableSparseMatrix, flush!,
-	AbstractExtendableSparseMatrixCSC, ExtendableSparseMatrixCSC, MTExtendableSparseMatrixCSC,
-	rawupdateindex!
+    AbstractExtendableSparseMatrixCSC, ExtendableSparseMatrixCSC, MTExtendableSparseMatrixCSC,
+    rawupdateindex!
 using ForwardDiff: ForwardDiff, DiffResults
 using LinearAlgebra: LinearAlgebra, convert, det, diagm, dot, eigen, ldiv!, lu,
-	mul!, norm, transpose
+    mul!, norm, transpose
 using Polynomials: Polynomials, Polynomial, coeffs
 using Printf: Printf, @printf
 using SparseArrays: SparseArrays, AbstractSparseArray, AbstractSparseMatrix,
-	SparseMatrixCSC, nzrange, rowvals
+    SparseMatrixCSC, nzrange, rowvals
 using SpecialPolynomials: SpecialPolynomials, ShiftedLegendre, basis
 
 include("functionoperators.jl")
@@ -139,24 +139,24 @@ export AccumulatingVector
 # Print default dict for solver parameters into docstrings
 #
 function _myprint(dict::Dict{Symbol, Tuple{Any, String}})
-	lines_out = IOBuffer()
-	for (k, v) in dict
-		if typeof(v[1]) <: String
-			println(lines_out, "  - $(k): $(v[2]). Default: ''$(v[1])''\n")
-		else
-			println(lines_out, "  - $(k): $(v[2]). Default: $(v[1])\n")
-		end
-	end
-	String(take!(lines_out))
+    lines_out = IOBuffer()
+    for (k, v) in dict
+        if typeof(v[1]) <: String
+            println(lines_out, "  - $(k): $(v[2]). Default: ''$(v[1])''\n")
+        else
+            println(lines_out, "  - $(k): $(v[2]). Default: $(v[1])\n")
+        end
+    end
+    return String(take!(lines_out))
 end
 #
 # Update solver params from dict
 #
 function _update_params!(parameters, kwargs)
-	for (k, v) in kwargs
-		parameters[Symbol(k)] = v
-	end
-	return nothing
+    for (k, v) in kwargs
+        parameters[Symbol(k)] = v
+    end
+    return nothing
 end
 
 include("segment_integrator.jl")

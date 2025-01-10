@@ -21,7 +21,7 @@ abstract type AbstractFiniteElement end
 #############################
 #
 # they are used to steer the kind of local2global transformation
-# below subtypes are defined that define basis functions on reference geometries 
+# below subtypes are defined that define basis functions on reference geometries
 # and some other information like polyonomial degrees etc.
 
 """
@@ -69,17 +69,17 @@ end
 A struct that has a finite element type as parameter and carries dofmaps (CellDofs, FaceDofs, BFaceDofs) plus additional grid information and access to arrays holding coefficients if needed.
 """
 struct FESpace{Tv, Ti, FEType <: AbstractFiniteElement, AT <: AssemblyType}
-	name::String                          # full name of finite element space (used in messages)
-	broken::Bool                          # if true, broken dofmaps are generated
-	ndofs::Int64                          # total number of dofs
-	coffset::Int                          # offset for component dofs
-	xgrid::ExtendableGrid{Tv, Ti}         # link to (master/parent) grid 
-	dofgrid::ExtendableGrid{Tv,Ti}	      # link to (sub) grid used for dof numbering (expected to be equal to or child grid of xgrid)
-	dofmaps::Dict{Type{<:AbstractGridComponent}, Any} # backpack with dofmaps
+    name::String                          # full name of finite element space (used in messages)
+    broken::Bool                          # if true, broken dofmaps are generated
+    ndofs::Int64                          # total number of dofs
+    coffset::Int                          # offset for component dofs
+    xgrid::ExtendableGrid{Tv, Ti}         # link to (master/parent) grid
+    dofgrid::ExtendableGrid{Tv, Ti}          # link to (sub) grid used for dof numbering (expected to be equal to or child grid of xgrid)
+    dofmaps::Dict{Type{<:AbstractGridComponent}, Any} # backpack with dofmaps
 end
 
 function Base.copy(FES::FESpace{Tv, Ti, FEType, AT}) where {Tv, Ti, FEType, AT}
-	return FESpace{Tv, Ti, FEType, AT}(deepcopy(FES.name), FES.broken, FES.ndofs, FES.coffset, FES.xgrid, FES.dofgrid, FES.dofmaps)
+    return FESpace{Tv, Ti, FEType, AT}(deepcopy(FES.name), FES.broken, FES.ndofs, FES.coffset, FES.xgrid, FES.dofgrid, FES.dofmaps)
 end
 
 """
@@ -132,58 +132,60 @@ The broken switch allows to generate a broken finite element space (that is piec
 If no AT is provided, the space is generated ON_CELLS.
 """
 function FESpace{FEType, AT}(
-	xgrid::ExtendableGrid{Tv, Ti};
-	name = "",
-	regions = nothing,
-	broken::Bool = false) where {Tv, Ti, FEType <: AbstractFiniteElement, AT <: AssemblyType}
+        xgrid::ExtendableGrid{Tv, Ti};
+        name = "",
+        regions = nothing,
+        broken::Bool = false
+    ) where {Tv, Ti, FEType <: AbstractFiniteElement, AT <: AssemblyType}
 
-	# piecewise constants are always broken
-	if FEType <: L2P0 || FEType <: L2P1
-		broken = true
-	end
+    # piecewise constants are always broken
+    if FEType <: L2P0 || FEType <: L2P1
+        broken = true
+    end
 
-	if AT == ON_FACES
-		if isnothing(regions)
-			regions = unique(xgrid[FaceRegions])
-		end
-		dofgrid = subgrid(xgrid, regions; support = ON_FACES, project = false)
-	elseif AT == ON_BFACES
-		if isnothing(regions)
-			regions = unique(xgrid[BFaceRegions])
-		end
-		dofgrid = subgrid(xgrid, regions; support = ON_BFACES, project = false)
-	elseif AT == ON_EDGES
-		@assert false "not possible currently"
-	end
+    if AT == ON_FACES
+        if isnothing(regions)
+            regions = unique(xgrid[FaceRegions])
+        end
+        dofgrid = subgrid(xgrid, regions; support = ON_FACES, project = false)
+    elseif AT == ON_BFACES
+        if isnothing(regions)
+            regions = unique(xgrid[BFaceRegions])
+        end
+        dofgrid = subgrid(xgrid, regions; support = ON_BFACES, project = false)
+    elseif AT == ON_EDGES
+        @assert false "not possible currently"
+    end
 
-	if isnothing(regions)
-		regions = unique(xgrid[CellRegions])
-	end
+    if isnothing(regions)
+        regions = unique(xgrid[CellRegions])
+    end
 
-	if AT !== ON_BFACES && AT !== ON_FACES
-		if regions != unique(xgrid[CellRegions])
-			dofgrid = subgrid(xgrid, regions)
-		else
-			dofgrid = xgrid
-		end
-	end
+    if AT !== ON_BFACES && AT !== ON_FACES
+        if regions != unique(xgrid[CellRegions])
+            dofgrid = subgrid(xgrid, regions)
+        else
+            dofgrid = xgrid
+        end
+    end
 
-	# first generate some empty FESpace
-	if name == ""
-		name = broken ? "$FEType (broken)" : "$FEType"
-	end
-	ndofs, coffset = count_ndofs(dofgrid, FEType, broken)
-	FES = FESpace{Tv, Ti, FEType, AT}(name, broken, ndofs, coffset, xgrid, dofgrid, Dict{Type{<:AbstractGridComponent}, Any}())
+    # first generate some empty FESpace
+    if name == ""
+        name = broken ? "$FEType (broken)" : "$FEType"
+    end
+    ndofs, coffset = count_ndofs(dofgrid, FEType, broken)
+    FES = FESpace{Tv, Ti, FEType, AT}(name, broken, ndofs, coffset, xgrid, dofgrid, Dict{Type{<:AbstractGridComponent}, Any}())
 
-	@debug "Generated FESpace $name ($AT, ndofs=$ndofs)"
+    @debug "Generated FESpace $name ($AT, ndofs=$ndofs)"
 
-	return FES
+    return FES
 end
 
 function FESpace{FEType}(
-	xgrid::ExtendableGrid{Tv, Ti};
-	kwargs...) where {Tv, Ti, FEType <: AbstractFiniteElement}
-	return FESpace{FEType, ON_CELLS}(xgrid; kwargs...)
+        xgrid::ExtendableGrid{Tv, Ti};
+        kwargs...
+    ) where {Tv, Ti, FEType <: AbstractFiniteElement}
+    return FESpace{FEType, ON_CELLS}(xgrid; kwargs...)
 end
 
 """
@@ -208,18 +210,19 @@ $(TYPEDSIGNATURES)
 Custom `show` function for `FESpace` that prints some information and all available dofmaps.
 """
 function Base.show(io::IO, FES::FESpace{Tv, Ti, FEType, APT}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
-	println(io, "\nFESpace information")
-	println(io, "===================")
-	println(io, "     name = $(FES.name)")
-	println(io, "   FEType = $FEType")
-	println(io, "  FEClass = $(supertype(FEType))")
-	println(io, "    ndofs = $(FES.ndofs)\n")
-	println(io, "")
-	println(io, "DofMaps")
-	println(io, "==========")
-	for tuple in FES.dofmaps
-		println(io, "> $(tuple[1])")
-	end
+    println(io, "\nFESpace information")
+    println(io, "===================")
+    println(io, "     name = $(FES.name)")
+    println(io, "   FEType = $FEType")
+    println(io, "  FEClass = $(supertype(FEType))")
+    println(io, "    ndofs = $(FES.ndofs)\n")
+    println(io, "")
+    println(io, "DofMaps")
+    println(io, "==========")
+    for tuple in FES.dofmaps
+        println(io, "> $(tuple[1])")
+    end
+    return
 end
 
 ## used if no coefficient handler or subset handler is needed (to have a single Function type for all)
@@ -241,7 +244,7 @@ returns the coefficients for local evaluations of finite element functions
 ( see e.g. h1v_br.jl for a use-case)
 """
 function get_coefficients(::Type{<:AssemblyType}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{<:AbstractElementGeometry}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
-	return NothingFunction
+    return NothingFunction
 end
 
 """
@@ -260,7 +263,7 @@ depending on the face orientations (which in 3D is not just a sign)
 
 """
 function get_basissubset(::Type{<:AssemblyType}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{<:AbstractElementGeometry}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
-	return NothingFunction
+    return NothingFunction
 end
 
 """
@@ -323,66 +326,65 @@ counts the total number of degrees of freedom for the FEType
 for the whole grid
 """
 function count_ndofs(xgrid, FEType, broken::Bool)
-	EG = xgrid[UniqueCellGeometries]
-	xItemGeometries = xgrid[CellGeometries]
-	if length(EG) == 1
-		ncells4EG = [(EG[1], num_cells(xgrid))]
-	else
-		ncells4EG = [(i, count(==(i), xItemGeometries)) for i in EG] # allocations !!!
-	end
-	ncomponents::Int = get_ncomponents(FEType)
-	totaldofs::Int = 0
-	offset4component::Int = 0
+    EG = xgrid[UniqueCellGeometries]
+    xItemGeometries = xgrid[CellGeometries]
+    if length(EG) == 1
+        ncells4EG = [(EG[1], num_cells(xgrid))]
+    else
+        ncells4EG = [(i, count(==(i), xItemGeometries)) for i in EG] # allocations !!!
+    end
+    ncomponents::Int = get_ncomponents(FEType)
+    totaldofs::Int = 0
+    offset4component::Int = 0
 
-	## todo : below it is assumed that number of dofs on nodes/edges/faces is the same for all EG
-	##        (which usually makes sense for unbroken elements, but who knows...)
-	for j ∈ 1:length(EG)
-		pattern = get_dofmap_pattern(FEType, CellDofs, EG[j])
-		parsed_dofmap = ParsedDofMap(pattern, ncomponents, EG[j])
-		if broken == true
-			# if broken count all dofs here
-			totaldofs += ncells4EG[j][2] * get_ndofs(parsed_dofmap)
-		else
-			# if not broken only count interior dofs on cell here
-			totaldofs += ncells4EG[j][2] * get_ndofs(parsed_dofmap, DofTypeInterior)
-			offset4component += ncells4EG[j][2] * get_ndofs4c(parsed_dofmap, DofTypeInterior)
-		end
+    ## todo : below it is assumed that number of dofs on nodes/edges/faces is the same for all EG
+    ##        (which usually makes sense for unbroken elements, but who knows...)
+    for j in 1:length(EG)
+        pattern = get_dofmap_pattern(FEType, CellDofs, EG[j])
+        parsed_dofmap = ParsedDofMap(pattern, ncomponents, EG[j])
+        if broken == true
+            # if broken count all dofs here
+            totaldofs += ncells4EG[j][2] * get_ndofs(parsed_dofmap)
+        else
+            # if not broken only count interior dofs on cell here
+            totaldofs += ncells4EG[j][2] * get_ndofs(parsed_dofmap, DofTypeInterior)
+            offset4component += ncells4EG[j][2] * get_ndofs4c(parsed_dofmap, DofTypeInterior)
+        end
 
-		if j == length(EG) && !broken
-			# add continuous dofs here
-			totaldofs += size(xgrid[Coordinates], 2) * get_ndofs(parsed_dofmap, DofTypeNode)
-			if get_ndofs(parsed_dofmap, DofTypeFace) > 0
-				totaldofs += num_sources(xgrid[FaceNodes]) * get_ndofs(parsed_dofmap, DofTypeFace)
-			end
-			if get_ndofs(parsed_dofmap, DofTypeEdge) > 0
-				totaldofs += num_sources(xgrid[EdgeNodes]) * get_ndofs(parsed_dofmap, DofTypeEdge)
-			end
+        if j == length(EG) && !broken
+            # add continuous dofs here
+            totaldofs += size(xgrid[Coordinates], 2) * get_ndofs(parsed_dofmap, DofTypeNode)
+            if get_ndofs(parsed_dofmap, DofTypeFace) > 0
+                totaldofs += num_sources(xgrid[FaceNodes]) * get_ndofs(parsed_dofmap, DofTypeFace)
+            end
+            if get_ndofs(parsed_dofmap, DofTypeEdge) > 0
+                totaldofs += num_sources(xgrid[EdgeNodes]) * get_ndofs(parsed_dofmap, DofTypeEdge)
+            end
 
-			# compute also offset4component
+            # compute also offset4component
 
-			offset4component += num_nodes(xgrid) * get_ndofs4c(parsed_dofmap, DofTypeNode)
-			if get_ndofs4c(parsed_dofmap, DofTypeFace) > 0
-				nfaces = num_sources(xgrid[FaceNodes])
-				offset4component += nfaces * get_ndofs4c(parsed_dofmap, DofTypeFace)
-			end
-			if get_ndofs4c(parsed_dofmap, DofTypeEdge) > 0
-				nedges = num_sources(xgrid[EdgeNodes])
-				offset4component += nedges * get_ndofs4c(parsed_dofmap, DofTypeEdge)
-			end
-			offset4component += num_cells(xgrid) * get_ndofs4c(parsed_dofmap, DofTypePCell)
-			#nitems::Int = length(xItemGeometries)
-			#offset4component += nitems * get_ndofs4c(parsed_dofmap, DofTypeInterior)
-		end
-	end
+            offset4component += num_nodes(xgrid) * get_ndofs4c(parsed_dofmap, DofTypeNode)
+            if get_ndofs4c(parsed_dofmap, DofTypeFace) > 0
+                nfaces = num_sources(xgrid[FaceNodes])
+                offset4component += nfaces * get_ndofs4c(parsed_dofmap, DofTypeFace)
+            end
+            if get_ndofs4c(parsed_dofmap, DofTypeEdge) > 0
+                nedges = num_sources(xgrid[EdgeNodes])
+                offset4component += nedges * get_ndofs4c(parsed_dofmap, DofTypeEdge)
+            end
+            offset4component += num_cells(xgrid) * get_ndofs4c(parsed_dofmap, DofTypePCell)
+            #nitems::Int = length(xItemGeometries)
+            #offset4component += nitems * get_ndofs4c(parsed_dofmap, DofTypeInterior)
+        end
+    end
 
-	return totaldofs, offset4component
+    return totaldofs, offset4component
 end
 
 
 include("fevector.jl");
 include("fematrix.jl");
 include("interpolations.jl")
-
 
 
 """
@@ -449,104 +451,103 @@ include("fedefs/hcurl_n0.jl");
 include("fedefs/hcurl_n1.jl");
 
 
-
 function get_coefficients(::Type{ON_BFACES}, FE::FESpace{Tv, Ti, FEType, APT}, EG::Type{<:AbstractElementGeometry}) where {Tv, Ti, FEType <: AbstractFiniteElement, APT}
-	get_coeffs_on_face = get_coefficients(ON_FACES, FE, EG)
-	xBFaceFaces = FE.xgrid[BFaceFaces]
-	function closure(coefficients, bface)
-		get_coeffs_on_face(coefficients, xBFaceFaces[bface])
-		return nothing
-	end
+    get_coeffs_on_face = get_coefficients(ON_FACES, FE, EG)
+    xBFaceFaces = FE.xgrid[BFaceFaces]
+    return function closure(coefficients, bface)
+        get_coeffs_on_face(coefficients, xBFaceFaces[bface])
+        return nothing
+    end
 end
 
 
 function get_reconstruction_matrix(T::Type{<:Real}, FE::FESpace, FER::FESpace)
-	xgrid = FE.xgrid
-	xCellGeometries = xgrid[CellGeometries]
-	EG = xgrid[UniqueCellGeometries]
+    xgrid = FE.xgrid
+    xCellGeometries = xgrid[CellGeometries]
+    EG = xgrid[UniqueCellGeometries]
 
-	FEType = eltype(FE)
-	FETypeReconst = eltype(FER)
+    FEType = eltype(FE)
+    FETypeReconst = eltype(FER)
 
-	ncells = num_sources(xgrid[CellNodes])
-	rhandlers = [get_reconstruction_coefficient(ON_CELLS, FE, FER, EG[1])]
-	chandlers = [get_coefficients(ON_CELLS, FER, EG[1])]
-	shandlers = [get_basissubset(ON_CELLS, FER, EG[1])]
-	for j ∈ 2:length(EG)
-		append!(rhandlers, [get_reconstruction_coefficients(ON_CELLS, FE, FER, EG[j])])
-		append!(chandlers, [get_coefficients(ON_CELLS, FER, EG[j])])
-		append!(shandlers, [get_basissubset(ON_CELLS, FER, EG[j])])
-	end
+    ncells = num_sources(xgrid[CellNodes])
+    rhandlers = [get_reconstruction_coefficient(ON_CELLS, FE, FER, EG[1])]
+    chandlers = [get_coefficients(ON_CELLS, FER, EG[1])]
+    shandlers = [get_basissubset(ON_CELLS, FER, EG[1])]
+    for j in 2:length(EG)
+        append!(rhandlers, [get_reconstruction_coefficients(ON_CELLS, FE, FER, EG[j])])
+        append!(chandlers, [get_coefficients(ON_CELLS, FER, EG[j])])
+        append!(shandlers, [get_basissubset(ON_CELLS, FER, EG[j])])
+    end
 
-	ndofs_FE = zeros(Int, length(EG))
-	ndofs_FER = zeros(Int, length(EG))
-	for j ∈ 1:length(EG)
-		ndofs_FE[j] = get_ndofs(ON_CELLS, FEType, EG[j])
-		ndofs_FER[j] = get_ndofs(ON_CELLS, FETypeReconst, EG[j])
-	end
+    ndofs_FE = zeros(Int, length(EG))
+    ndofs_FER = zeros(Int, length(EG))
+    for j in 1:length(EG)
+        ndofs_FE[j] = get_ndofs(ON_CELLS, FEType, EG[j])
+        ndofs_FER[j] = get_ndofs(ON_CELLS, FETypeReconst, EG[j])
+    end
 
-	xCellDofs = FE[CellDofs]
-	xCellDofsR = FER[CellDofs]
+    xCellDofs = FE[CellDofs]
+    xCellDofsR = FER[CellDofs]
 
-	## generate matrix
-	A = ExtendableSparseMatrix{T, Int64}(FER.ndofs, FE.ndofs)
+    ## generate matrix
+    A = ExtendableSparseMatrix{T, Int64}(FER.ndofs, FE.ndofs)
 
-	iEG = 1
-	cellEG = EG[1]
-	ncomponents = get_ncomponents(FEType)
-	coefficients = zeros(T, ncomponents, maximum(ndofs_FER))
-	basissubset = zeros(Int, maximum(ndofs_FER))
-	rcoefficients = zeros(T, maximum(ndofs_FE), maximum(ndofs_FER))
-	dof::Int = 0
-	dofR::Int = 0
-	for cell ∈ 1:ncells
-		if length(EG) > 1
-			cellEG = xCellGeometries[cell]
-			for j ∈ 1:length(EG)
-				if cellEG == EG[j]
-					iEG = j
-					break
-				end
-			end
-		end
-		# get Hdiv coefficients and subset
-		chandlers[iEG](coefficients, cell)
-		shandlers[iEG](basissubset, cell)
+    iEG = 1
+    cellEG = EG[1]
+    ncomponents = get_ncomponents(FEType)
+    coefficients = zeros(T, ncomponents, maximum(ndofs_FER))
+    basissubset = zeros(Int, maximum(ndofs_FER))
+    rcoefficients = zeros(T, maximum(ndofs_FE), maximum(ndofs_FER))
+    dof::Int = 0
+    dofR::Int = 0
+    for cell in 1:ncells
+        if length(EG) > 1
+            cellEG = xCellGeometries[cell]
+            for j in 1:length(EG)
+                if cellEG == EG[j]
+                    iEG = j
+                    break
+                end
+            end
+        end
+        # get Hdiv coefficients and subset
+        chandlers[iEG](coefficients, cell)
+        shandlers[iEG](basissubset, cell)
 
-		# get reconstruction coefficients
-		rhandlers[iEG](rcoefficients, cell)
+        # get reconstruction coefficients
+        rhandlers[iEG](rcoefficients, cell)
 
-		for dof_i ∈ 1:ndofs_FE[iEG]
-			dof = xCellDofs[dof_i, cell]
-			for dof_j ∈ 1:ndofs_FER[iEG]
-				if rcoefficients[dof_i, dof_j] != 0
-					dofR = xCellDofsR[dof_j, cell]
-					A[dofR, dof] = rcoefficients[dof_i, dof_j]
-				end
-			end
-		end
-	end
-	flush!(A)
-	return A
+        for dof_i in 1:ndofs_FE[iEG]
+            dof = xCellDofs[dof_i, cell]
+            for dof_j in 1:ndofs_FER[iEG]
+                if rcoefficients[dof_i, dof_j] != 0
+                    dofR = xCellDofsR[dof_j, cell]
+                    A[dofR, dof] = rcoefficients[dof_i, dof_j]
+                end
+            end
+        end
+    end
+    flush!(A)
+    return A
 end
 
 function get_local_coffsets(FEType, AT, EG)
-	## get dofmap pattern
-	pattern = get_dofmap_pattern(FEType, Dofmap4AssemblyType(AT), EG)
-	ncomponents = get_ncomponents(FEType)
-	parsed_dofmap = ParsedDofMap(pattern, ncomponents, EG)
-	local_coffset = 0
-	local_coffset += num_nodes(EG) * get_ndofs4c(parsed_dofmap, DofTypeNode)
-	if get_ndofs4c(parsed_dofmap, DofTypeFace) > 0
-		local_coffset += num_faces(EG) * get_ndofs4c(parsed_dofmap, DofTypeFace)
-	end
-	if get_ndofs4c(parsed_dofmap, DofTypeEdge) > 0
-		local_coffset += num_edges(EG) * get_ndofs4c(parsed_dofmap, DofTypeEdge)
-	end
-	local_coffset += get_ndofs4c(parsed_dofmap, DofTypeInterior)
-	if local_coffset == 0
-		return Int[]
-	else
-		return 0:local_coffset:ncomponents*local_coffset
-	end
+    ## get dofmap pattern
+    pattern = get_dofmap_pattern(FEType, Dofmap4AssemblyType(AT), EG)
+    ncomponents = get_ncomponents(FEType)
+    parsed_dofmap = ParsedDofMap(pattern, ncomponents, EG)
+    local_coffset = 0
+    local_coffset += num_nodes(EG) * get_ndofs4c(parsed_dofmap, DofTypeNode)
+    if get_ndofs4c(parsed_dofmap, DofTypeFace) > 0
+        local_coffset += num_faces(EG) * get_ndofs4c(parsed_dofmap, DofTypeFace)
+    end
+    if get_ndofs4c(parsed_dofmap, DofTypeEdge) > 0
+        local_coffset += num_edges(EG) * get_ndofs4c(parsed_dofmap, DofTypeEdge)
+    end
+    local_coffset += get_ndofs4c(parsed_dofmap, DofTypeInterior)
+    if local_coffset == 0
+        return Int[]
+    else
+        return 0:local_coffset:(ncomponents * local_coffset)
+    end
 end

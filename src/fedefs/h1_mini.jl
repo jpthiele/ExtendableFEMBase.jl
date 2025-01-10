@@ -1,4 +1,3 @@
-
 """
 ````
 abstract type H1MINI{ncomponents,edim} <: AbstractH1FiniteElement where {ncomponents<:Int,edim<:Int}
@@ -15,7 +14,7 @@ abstract type H1MINI{ncomponents, edim} <: AbstractH1FiniteElement where {ncompo
 H1MINI(ncomponents::Int, edim = ncomponents) = H1MINI{ncomponents, edim}
 
 function Base.show(io::Core.IO, ::Type{<:H1MINI{ncomponents, edim}}) where {ncomponents, edim}
-	print(io, "H1MINI{$ncomponents,$edim}")
+    return print(io, "H1MINI{$ncomponents,$edim}")
 end
 
 get_ncomponents(FEType::Type{<:H1MINI}) = FEType.parameters[1]
@@ -44,85 +43,89 @@ get_ref_cellmoments(::Type{<:H1MINI}, ::Type{<:Quadrilateral2D}) = [1 // 4, 1 //
 interior_dofs_offset(::Type{ON_CELLS}, ::Type{H1MINI{ncomponents, edim}}, EG::Type{<:AbstractElementGeometry}) where {ncomponents, edim} = num_nodes(EG)
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{AT_NODES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
-	nnodes = size(FE.dofgrid[Coordinates], 2)
-	ncells = num_sources(FE.dofgrid[CellNodes])
-	point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = nnodes + ncells, kwargs...)
+    nnodes = size(FE.dofgrid[Coordinates], 2)
+    ncells = num_sources(FE.dofgrid[CellNodes])
+    return point_evaluation!(Target, FE, AT_NODES, exact_function!; items = items, component_offset = nnodes + ncells, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_EDGES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
-	# delegate edge nodes to node interpolation
-	subitems = slice(FE.dofgrid[EdgeNodes], items)
-	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
+    # delegate edge nodes to node interpolation
+    subitems = slice(FE.dofgrid[EdgeNodes], items)
+    return interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
-	# delegate face nodes to node interpolation
-	subitems = slice(FE.dofgrid[FaceNodes], items)
-	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
+    # delegate face nodes to node interpolation
+    subitems = slice(FE.dofgrid[FaceNodes], items)
+    return interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {Tv, Ti, FEType <: H1MINI, APT}
-	# delegate cell nodes to node interpolation
-	subitems = slice(FE.dofgrid[CellNodes], items)
-	interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
+    # delegate cell nodes to node interpolation
+    subitems = slice(FE.dofgrid[CellNodes], items)
+    interpolate!(Target, FE, AT_NODES, exact_function!; items = subitems, kwargs...)
 
-	# fix cell bubble value by preserving integral mean
-	ensure_moments!(Target, FE, ON_CELLS, exact_function!; items = items, kwargs...)
+    # fix cell bubble value by preserving integral mean
+    return ensure_moments!(Target, FE, ON_CELLS, exact_function!; items = items, kwargs...)
 end
 
 function nodevalues!(Target::AbstractArray{<:Real, 2}, Source::AbstractArray{<:Real, 1}, FE::FESpace{<:H1MINI})
-	nnodes = num_sources(FE.dofgrid[Coordinates])
-	ncells = num_sources(FE.dofgrid[CellNodes])
-	FEType = eltype(FE)
-	ncomponents = get_ncomponents(FEType)
-	offset4component = 0:(nnodes+ncells):ncomponents*(nnodes+ncells)
-	for node ∈ 1:nnodes
-		for c ∈ 1:ncomponents
-			Target[c, node] = Source[offset4component[c]+node]
-		end
-	end
+    nnodes = num_sources(FE.dofgrid[Coordinates])
+    ncells = num_sources(FE.dofgrid[CellNodes])
+    FEType = eltype(FE)
+    ncomponents = get_ncomponents(FEType)
+    offset4component = 0:(nnodes + ncells):(ncomponents * (nnodes + ncells))
+    for node in 1:nnodes
+        for c in 1:ncomponents
+            Target[c, node] = Source[offset4component[c] + node]
+        end
+    end
+    return
 end
 
 function get_basis(AT::Union{Type{<:ON_FACES}, Type{<:ON_BFACES}}, ::Type{H1MINI{ncomponents, edim}}, EG::Type{<:AbstractElementGeometry}) where {ncomponents, edim}
-	# on faces same as P1
-	return get_basis(AT, H1P1{ncomponents}, EG)
+    # on faces same as P1
+    return get_basis(AT, H1P1{ncomponents}, EG)
 end
 
 function get_basis(AT::Type{<:ON_CELLS}, ::Type{H1MINI{ncomponents, edim}}, EG::Type{<:Triangle2D}) where {ncomponents, edim}
-	refbasis_P1 = get_basis(AT, H1P1{1}, EG)
-	offset = get_ndofs(AT, H1P1{1}, EG) + 1
-	function closure(refbasis, xref)
-		refbasis_P1(refbasis, xref)
-		# add cell bubbles to P1 basis (scaled to have unit integral)
-		refbasis[offset, 1] = 60 * (1 - xref[1] - xref[2]) * xref[1] * xref[2]
-		for k ∈ 1:ncomponents-1, j ∈ 1:offset
-			refbasis[k*offset+j, k+1] = refbasis[j, 1]
-		end
-	end
+    refbasis_P1 = get_basis(AT, H1P1{1}, EG)
+    offset = get_ndofs(AT, H1P1{1}, EG) + 1
+    return function closure(refbasis, xref)
+        refbasis_P1(refbasis, xref)
+        # add cell bubbles to P1 basis (scaled to have unit integral)
+        refbasis[offset, 1] = 60 * (1 - xref[1] - xref[2]) * xref[1] * xref[2]
+        for k in 1:(ncomponents - 1), j in 1:offset
+            refbasis[k * offset + j, k + 1] = refbasis[j, 1]
+        end
+        return
+    end
 end
 
 function get_basis(AT::Type{<:ON_CELLS}, ::Type{H1MINI{ncomponents, edim}}, EG::Type{<:Quadrilateral2D}) where {ncomponents, edim}
-	refbasis_P1 = get_basis(AT, H1Q1{1}, EG)
-	offset = get_ndofs(AT, H1Q1{1}, EG) + 1
-	function closure(refbasis, xref)
-		refbasis_P1(refbasis, xref)
-		# add cell bubbles to P1 basis (scaled to have unit integral)
-		refbasis[offset, 1] = 36 * (1 - xref[1]) * (1 - xref[2]) * xref[1] * xref[2]
-		for k ∈ 1:ncomponents-1, j ∈ 1:offset
-			refbasis[k*offset+j, k+1] = refbasis[j, 1]
-		end
-	end
+    refbasis_P1 = get_basis(AT, H1Q1{1}, EG)
+    offset = get_ndofs(AT, H1Q1{1}, EG) + 1
+    return function closure(refbasis, xref)
+        refbasis_P1(refbasis, xref)
+        # add cell bubbles to P1 basis (scaled to have unit integral)
+        refbasis[offset, 1] = 36 * (1 - xref[1]) * (1 - xref[2]) * xref[1] * xref[2]
+        for k in 1:(ncomponents - 1), j in 1:offset
+            refbasis[k * offset + j, k + 1] = refbasis[j, 1]
+        end
+        return
+    end
 end
 
 function get_basis(AT::Type{<:ON_CELLS}, ::Type{H1MINI{ncomponents, edim}}, EG::Type{<:Tetrahedron3D}) where {ncomponents, edim}
-	refbasis_P1 = get_basis(AT, H1P1{1}, EG)
-	offset = get_ndofs(AT, H1P1{1}, EG) + 1
-	function closure(refbasis, xref)
-		refbasis_P1(refbasis, xref)
-		# add cell bubbles to P1 basis (scaled to have unit integral)
-		refbasis[offset, 1] = 840 * (1 - xref[1] - xref[2] - xref[3]) * xref[1] * xref[2] * xref[3]
-		for k ∈ 1:ncomponents-1, j ∈ 1:offset
-			refbasis[k*offset+j, k+1] = refbasis[j, 1]
-		end
-	end
+    refbasis_P1 = get_basis(AT, H1P1{1}, EG)
+    offset = get_ndofs(AT, H1P1{1}, EG) + 1
+    return function closure(refbasis, xref)
+        refbasis_P1(refbasis, xref)
+        # add cell bubbles to P1 basis (scaled to have unit integral)
+        refbasis[offset, 1] = 840 * (1 - xref[1] - xref[2] - xref[3]) * xref[1] * xref[2] * xref[3]
+        for k in 1:(ncomponents - 1), j in 1:offset
+            refbasis[k * offset + j, k + 1] = refbasis[j, 1]
+        end
+        return
+    end
 end

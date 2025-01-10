@@ -11,11 +11,11 @@ automatically accumulates all values from the second dimension
 AV[k,j] += s for any j results in AV.entries[k] += s
 """
 struct AccumulatingVector{T} <: AbstractArray{T, 2}
-	entries::Array{T, 1}
-	size2::Int
+    entries::Array{T, 1}
+    size2::Int
 end
 
-# 
+#
 
 # overload stuff for AbstractArray{T,2} behaviour
 Base.getindex(AV::AccumulatingVector, i::Int, j) = AV.entries[i]
