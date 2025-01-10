@@ -15,7 +15,7 @@ abstract type HDIVRT0{edim} <: AbstractHdivFiniteElement where {edim <: Int} end
 HDIVRT0(edim::Int) = HDIVRT0{edim}
 
 function Base.show(io::Core.IO, FEType::Type{<:HDIVRT0{edim}}) where {edim}
-	print(io, "HDIVRT0{$edim}")
+    return print(io, "HDIVRT0{$edim}")
 end
 
 get_ncomponents(FEType::Type{<:HDIVRT0}) = FEType.parameters[1]
@@ -36,95 +36,95 @@ isdefined(FEType::Type{<:HDIVRT0}, ::Type{<:Tetrahedron3D}) = true
 isdefined(FEType::Type{<:HDIVRT0}, ::Type{<:Hexahedron3D}) = true
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_FACES}, data; items = [], kwargs...) where {T, Tv, Ti, FEType <: HDIVRT0, APT}
-	xFaceNormals = FE.dofgrid[FaceNormals]
-	if items == []
-		items = 1:size(xFaceNormals, 2)
-	end
+    xFaceNormals = FE.dofgrid[FaceNormals]
+    if items == []
+        items = 1:size(xFaceNormals, 2)
+    end
 
-	# compute exact face means
-	data_eval = zeros(T, get_ncomponents(FEType))
-	function normalflux_eval(result, qpinfo)
-		data(data_eval, qpinfo)
-		result[1] = dot(data_eval, view(xFaceNormals, :, qpinfo.item))
-	end
-	integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; items = items, kwargs...)
+    # compute exact face means
+    data_eval = zeros(T, get_ncomponents(FEType))
+    function normalflux_eval(result, qpinfo)
+        data(data_eval, qpinfo)
+        return result[1] = dot(data_eval, view(xFaceNormals, :, qpinfo.item))
+    end
+    return integrate!(Target, FE.dofgrid, ON_FACES, normalflux_eval; items = items, kwargs...)
 end
 
 function ExtendableGrids.interpolate!(Target, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, data; items = [], kwargs...) where {Tv, Ti, FEType <: HDIVRT0, APT}
-	# delegate cell faces to face interpolation
-	subitems = slice(FE.dofgrid[CellFaces], items)
-	interpolate!(Target, FE, ON_FACES, data; items = subitems, kwargs...)
+    # delegate cell faces to face interpolation
+    subitems = slice(FE.dofgrid[CellFaces], items)
+    return interpolate!(Target, FE, ON_FACES, data; items = subitems, kwargs...)
 end
 
 # only normalfluxes on faces
 function get_basis(::Union{Type{<:ON_FACES}, Type{<:ON_BFACES}}, ::Type{<:HDIVRT0}, ::Type{<:AbstractElementGeometry})
-	function closure(refbasis, xref)
-		refbasis[1, 1] = 1
-	end
+    return function closure(refbasis, xref)
+        return refbasis[1, 1] = 1
+    end
 end
 
 function get_basis(::Type{ON_CELLS}, ::Type{HDIVRT0{2}}, ::Type{<:Triangle2D})
-	function closure(refbasis, xref)
-		refbasis[1, 1] = xref[1]
-		refbasis[1, 2] = xref[2] - 1
-		refbasis[2, 1] = xref[1]
-		refbasis[2, 2] = xref[2]
-		refbasis[3, 1] = xref[1] - 1
-		refbasis[3, 2] = xref[2]
-	end
+    return function closure(refbasis, xref)
+        refbasis[1, 1] = xref[1]
+        refbasis[1, 2] = xref[2] - 1
+        refbasis[2, 1] = xref[1]
+        refbasis[2, 2] = xref[2]
+        refbasis[3, 1] = xref[1] - 1
+        return refbasis[3, 2] = xref[2]
+    end
 end
 
 function get_basis(::Type{ON_CELLS}, ::Type{HDIVRT0{2}}, ::Type{<:Quadrilateral2D})
-	function closure(refbasis, xref)
-		refbasis[1, 1] = 0
-		refbasis[1, 2] = xref[2] - 1
-		refbasis[2, 1] = xref[1]
-		refbasis[2, 2] = 0
-		refbasis[3, 1] = 0
-		refbasis[3, 2] = xref[2]
-		refbasis[4, 1] = xref[1] - 1
-		refbasis[4, 2] = 0
-	end
+    return function closure(refbasis, xref)
+        refbasis[1, 1] = 0
+        refbasis[1, 2] = xref[2] - 1
+        refbasis[2, 1] = xref[1]
+        refbasis[2, 2] = 0
+        refbasis[3, 1] = 0
+        refbasis[3, 2] = xref[2]
+        refbasis[4, 1] = xref[1] - 1
+        return refbasis[4, 2] = 0
+    end
 end
 
 function get_basis(::Type{ON_CELLS}, ::Type{HDIVRT0{3}}, ::Type{<:Tetrahedron3D})
-	function closure(refbasis, xref)
-		refbasis[1, 1] = 2 * xref[1]
-		refbasis[1, 2] = 2 * xref[2]
-		refbasis[1, 3] = 2 * (xref[3] - 1)
-		refbasis[2, 1] = 2 * xref[1]
-		refbasis[2, 2] = 2 * (xref[2] - 1)
-		refbasis[2, 3] = 2 * xref[3]
-		refbasis[3, 1] = 2 * xref[1]
-		refbasis[3, 2] = 2 * xref[2]
-		refbasis[3, 3] = 2 * xref[3]
-		refbasis[4, 1] = 2 * (xref[1] - 1)
-		refbasis[4, 2] = 2 * xref[2]
-		refbasis[4, 3] = 2 * xref[3]
-	end
-	# note: factor 2 is chosen, such that normal-flux integrated over faces is 1 again
+    return function closure(refbasis, xref)
+        refbasis[1, 1] = 2 * xref[1]
+        refbasis[1, 2] = 2 * xref[2]
+        refbasis[1, 3] = 2 * (xref[3] - 1)
+        refbasis[2, 1] = 2 * xref[1]
+        refbasis[2, 2] = 2 * (xref[2] - 1)
+        refbasis[2, 3] = 2 * xref[3]
+        refbasis[3, 1] = 2 * xref[1]
+        refbasis[3, 2] = 2 * xref[2]
+        refbasis[3, 3] = 2 * xref[3]
+        refbasis[4, 1] = 2 * (xref[1] - 1)
+        refbasis[4, 2] = 2 * xref[2]
+        return refbasis[4, 3] = 2 * xref[3]
+    end
+    # note: factor 2 is chosen, such that normal-flux integrated over faces is 1 again
 end
 
 function get_basis(::Type{ON_CELLS}, ::Type{HDIVRT0{3}}, ::Type{<:Hexahedron3D})
-	function closure(refbasis, xref)
-		fill!(refbasis, 0)
-		refbasis[1, 3] = xref[3] - 1
-		refbasis[2, 2] = xref[2] - 1
-		refbasis[3, 1] = xref[1]
-		refbasis[4, 2] = xref[2]
-		refbasis[5, 1] = xref[1] - 1
-		refbasis[6, 3] = xref[3]
-	end
+    return function closure(refbasis, xref)
+        fill!(refbasis, 0)
+        refbasis[1, 3] = xref[3] - 1
+        refbasis[2, 2] = xref[2] - 1
+        refbasis[3, 1] = xref[1]
+        refbasis[4, 2] = xref[2]
+        refbasis[5, 1] = xref[1] - 1
+        return refbasis[6, 3] = xref[3]
+    end
 end
 
 function get_coefficients(::Type{ON_CELLS}, FE::FESpace{Tv, Ti, <:HDIVRT0, APT}, EG::Type{<:AbstractElementGeometry}) where {Tv, Ti, APT}
-	xCellFaceSigns = FE.dofgrid[CellFaceSigns]
-	nfaces = num_faces(EG)
-	function closure(coefficients, cell)
-		# multiplication with normal vector signs
-		for j ∈ 1:nfaces, k ∈ 1:size(coefficients, 1)
-			coefficients[k, j] = xCellFaceSigns[j, cell]
-		end
-		return nothing
-	end
+    xCellFaceSigns = FE.dofgrid[CellFaceSigns]
+    nfaces = num_faces(EG)
+    return function closure(coefficients, cell)
+        # multiplication with normal vector signs
+        for j in 1:nfaces, k in 1:size(coefficients, 1)
+            coefficients[k, j] = xCellFaceSigns[j, cell]
+        end
+        return nothing
+    end
 end

@@ -15,7 +15,7 @@ abstract type H1BUBBLE{ncomponents} <: AbstractH1FiniteElement where {ncomponent
 H1BUBBLE(ncomponents::Int) = H1BUBBLE{ncomponents}
 
 function Base.show(io::Core.IO, ::Type{<:H1BUBBLE{ncomponents}}) where {ncomponents}
-	print(io, "H1BUBBLE{$ncomponents}")
+    return print(io, "H1BUBBLE{$ncomponents}")
 end
 
 get_ncomponents(FEType::Type{<:H1BUBBLE}) = FEType.parameters[1]
@@ -36,53 +36,58 @@ isdefined(FEType::Type{<:H1BUBBLE}, ::Type{<:Tetrahedron3D}) = true
 interior_dofs_offset(::Type{ON_CELLS}, ::Type{H1BUBBLE{ncomponents}}, EG::Type{<:AbstractElementGeometry}) where {ncomponents} = 0
 
 function ExtendableGrids.interpolate!(Target::AbstractArray{T, 1}, FE::FESpace{Tv, Ti, FEType, APT}, ::Type{ON_CELLS}, exact_function!; items = [], kwargs...) where {T, Tv, Ti, FEType <: H1BUBBLE, APT}
-	xCellVolumes = FE.dofgrid[CellVolumes]
-	ncells = num_sources(FE.dofgrid[CellNodes])
-	if items == []
-		items = 1:ncells
-	else
-		items = filter(!iszero, items)
-	end
-	ncomponents = get_ncomponents(FEType)
-	integrals4cell = zeros(T, ncomponents, ncells)
-	integrate!(integrals4cell, FE.dofgrid, ON_CELLS, exact_function!; items = items, kwargs...)
-	for cell in items
-		if cell != 0
-			for c ∈ 1:ncomponents
-				Target[(cell-1)*ncomponents+c] = integrals4cell[c, cell] / xCellVolumes[cell]
-			end
-		end
-	end
+    xCellVolumes = FE.dofgrid[CellVolumes]
+    ncells = num_sources(FE.dofgrid[CellNodes])
+    if items == []
+        items = 1:ncells
+    else
+        items = filter(!iszero, items)
+    end
+    ncomponents = get_ncomponents(FEType)
+    integrals4cell = zeros(T, ncomponents, ncells)
+    integrate!(integrals4cell, FE.dofgrid, ON_CELLS, exact_function!; items = items, kwargs...)
+    for cell in items
+        if cell != 0
+            for c in 1:ncomponents
+                Target[(cell - 1) * ncomponents + c] = integrals4cell[c, cell] / xCellVolumes[cell]
+            end
+        end
+    end
+    return
 end
 
 function get_basis(::Type{<:AssemblyType}, ::Type{H1BUBBLE{ncomponents}}, ::Type{<:AbstractElementGeometry1D}) where {ncomponents}
-	function closure(refbasis, xref)
-		for k ∈ 1:ncomponents
-			refbasis[k, k] = 6 * xref[1] * (1 - xref[1])
-		end
-	end
+    return function closure(refbasis, xref)
+        for k in 1:ncomponents
+            refbasis[k, k] = 6 * xref[1] * (1 - xref[1])
+        end
+        return
+    end
 end
 
 function get_basis(::Type{<:AssemblyType}, ::Type{H1BUBBLE{ncomponents}}, ::Type{<:Triangle2D}) where {ncomponents}
-	function closure(refbasis, xref)
-		for k ∈ 1:ncomponents
-			refbasis[k, k] = 60 * (1 - xref[1] - xref[2]) * xref[1] * xref[2]
-		end
-	end
+    return function closure(refbasis, xref)
+        for k in 1:ncomponents
+            refbasis[k, k] = 60 * (1 - xref[1] - xref[2]) * xref[1] * xref[2]
+        end
+        return
+    end
 end
 
 function get_basis(::Type{<:AssemblyType}, ::Type{H1BUBBLE{ncomponents}}, ::Type{<:Quadrilateral2D}) where {ncomponents}
-	function closure(refbasis, xref)
-		for k ∈ 1:ncomponents
-			refbasis[k, k] = 36 * (1 - xref[1]) * (1 - xref[2]) * xref[1] * xref[2]
-		end
-	end
+    return function closure(refbasis, xref)
+        for k in 1:ncomponents
+            refbasis[k, k] = 36 * (1 - xref[1]) * (1 - xref[2]) * xref[1] * xref[2]
+        end
+        return
+    end
 end
 
 function get_basis(::Type{<:AssemblyType}, ::Type{H1BUBBLE{ncomponents}}, ::Type{<:Tetrahedron3D}) where {ncomponents}
-	function closure(refbasis, xref)
-		for k ∈ 1:ncomponents
-			refbasis[k, k] = 840 * (1 - xref[1] - xref[2] - xref[3]) * xref[1] * xref[2] * xref[3]
-		end
-	end
+    return function closure(refbasis, xref)
+        for k in 1:ncomponents
+            refbasis[k, k] = 840 * (1 - xref[1] - xref[2] - xref[3]) * xref[1] * xref[2] * xref[3]
+        end
+        return
+    end
 end

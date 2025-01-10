@@ -160,7 +160,7 @@ default name of the operator for print-outs
 """
 DefaultName4Operator(::Type{<:AbstractFunctionOperator}) = "??"
 DefaultName4Operator(::Type{Identity}) = "id"
-DefaultName4Operator(IC::Type{<:IdentityComponent{T}}) where T = "id_$(T)"
+DefaultName4Operator(IC::Type{<:IdentityComponent{T}}) where {T} = "id_$(T)"
 DefaultName4Operator(::Type{NormalFlux}) = "NormalFlux"
 DefaultName4Operator(::Type{TangentFlux}) = "TangentialFlux"
 DefaultName4Operator(::Type{<:Gradient}) = "∇"
@@ -177,7 +177,7 @@ DefaultName4Operator(::Type{Trace}) = "tr"
 DefaultName4Operator(::Type{Deviator}) = "dev"
 
 function Base.show(io::Core.IO, FO::Type{<:AbstractFunctionOperator})
-	print(io, "$(DefaultName4Operator(FO))")
+    return print(io, "$(DefaultName4Operator(FO))")
 end
 
 # length for operator result

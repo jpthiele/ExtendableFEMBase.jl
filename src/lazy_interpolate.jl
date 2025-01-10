@@ -1,5 +1,3 @@
-
-
 """
 ````
 function lazy_interpolate!(
@@ -28,72 +26,73 @@ Note: discontinuous quantities at vertices of the target grid will be evaluated 
 source grid. No averaging is performed. With eps the tolerances of the cell search via ExtendableGrids.CellFinder can be steered.
 """
 function lazy_interpolate!(
-	target::FEVectorBlock{T1, Tv, Ti},
-	source,
-	operators = [(1, Identity)];
-	postprocess = standard_kernel,
-	xtrafo = nothing,
-	items = [],
-	resultdim = get_ncomponents(eltype(target.FES)),
-	not_in_domain_value = 1e30,
-	start_cell = 1,
-	only_localsearch = false,
-	use_cellparents::Bool = false,
-	eps = 1e-13,
-	kwargs...) where {T1, Tv, Ti}
+        target::FEVectorBlock{T1, Tv, Ti},
+        source,
+        operators = [(1, Identity)];
+        postprocess = standard_kernel,
+        xtrafo = nothing,
+        items = [],
+        resultdim = get_ncomponents(eltype(target.FES)),
+        not_in_domain_value = 1.0e30,
+        start_cell = 1,
+        only_localsearch = false,
+        use_cellparents::Bool = false,
+        eps = 1.0e-13,
+        kwargs...
+    ) where {T1, Tv, Ti}
 
-	# wrap point evaluation into function that is put into normal interpolate!
-	xgrid = source[1].FES.xgrid
-	xdim_source::Int = size(xgrid[Coordinates], 1)
-	xdim_target::Int = size(target.FES.xgrid[Coordinates], 1)
-	if xdim_source != xdim_target
-		@assert xtrafo !== nothing "grids have different coordinate dimensions, need xtrafo!"
-	end
-	PE = PointEvaluator(postprocess, operators, source)
-	xref = zeros(Tv, xdim_source)
-	x_source = zeros(Tv, xdim_source)
-	cell::Int = start_cell
-	lastnonzerocell::Int = start_cell
-	same_cells::Bool = xgrid == target.FES.xgrid
-	CF::CellFinder{Tv, Ti} = CellFinder(xgrid)
+    # wrap point evaluation into function that is put into normal interpolate!
+    xgrid = source[1].FES.xgrid
+    xdim_source::Int = size(xgrid[Coordinates], 1)
+    xdim_target::Int = size(target.FES.xgrid[Coordinates], 1)
+    if xdim_source != xdim_target
+        @assert xtrafo !== nothing "grids have different coordinate dimensions, need xtrafo!"
+    end
+    PE = PointEvaluator(postprocess, operators, source)
+    xref = zeros(Tv, xdim_source)
+    x_source = zeros(Tv, xdim_source)
+    cell::Int = start_cell
+    lastnonzerocell::Int = start_cell
+    same_cells::Bool = xgrid == target.FES.xgrid
+    CF::CellFinder{Tv, Ti} = CellFinder(xgrid)
 
-	if same_cells || use_cellparents == true
-		if same_cells
-			xCellParents = 1:num_cells(target.FES.xgrid)
-		else
-			xCellParents::Array{Ti, 1} = target.FES.xgrid[CellParents]
-		end
-		function point_evaluation_parentgrid!(result, qpinfo)
-			x = qpinfo.x
-			cell = xCellParents[qpinfo.cell]
-			if xtrafo !== nothing
-				xtrafo(x_source, x)
-				cell = gFindLocal!(xref, CF, x_source; icellstart = cell, eps = eps, trybrute = !only_localsearch)
-			else
-				cell = gFindLocal!(xref, CF, x; icellstart = cell, eps = eps, trybrute = !only_localsearch)
-			end
-			evaluate_bary!(result, PE, xref, cell)
-			return nothing
-		end
-		fe_function = point_evaluation_parentgrid!
-	else
-		function point_evaluation_arbitrarygrids!(result, qpinfo)
-			x = qpinfo.x
-			if xtrafo !== nothing
-				xtrafo(x_source, x)
-				cell = gFindLocal!(xref, CF, x_source; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
-			else
-				cell = gFindLocal!(xref, CF, x; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
-			end
-			if cell == 0
-				fill!(result, not_in_domain_value)
-			else
-				evaluate_bary!(result, PE, xref, cell)
-				lastnonzerocell = cell
-			end
-			return nothing
-		end
-		fe_function = point_evaluation_arbitrarygrids!
-	end
-	interpolate!(target, ON_CELLS, fe_function; resultdim = resultdim, items = items, kwargs...)
+    if same_cells || use_cellparents == true
+        if same_cells
+            xCellParents = 1:num_cells(target.FES.xgrid)
+        else
+            xCellParents::Array{Ti, 1} = target.FES.xgrid[CellParents]
+        end
+        function point_evaluation_parentgrid!(result, qpinfo)
+            x = qpinfo.x
+            cell = xCellParents[qpinfo.cell]
+            if xtrafo !== nothing
+                xtrafo(x_source, x)
+                cell = gFindLocal!(xref, CF, x_source; icellstart = cell, eps = eps, trybrute = !only_localsearch)
+            else
+                cell = gFindLocal!(xref, CF, x; icellstart = cell, eps = eps, trybrute = !only_localsearch)
+            end
+            evaluate_bary!(result, PE, xref, cell)
+            return nothing
+        end
+        fe_function = point_evaluation_parentgrid!
+    else
+        function point_evaluation_arbitrarygrids!(result, qpinfo)
+            x = qpinfo.x
+            if xtrafo !== nothing
+                xtrafo(x_source, x)
+                cell = gFindLocal!(xref, CF, x_source; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
+            else
+                cell = gFindLocal!(xref, CF, x; icellstart = lastnonzerocell, eps = eps, trybrute = !only_localsearch)
+            end
+            if cell == 0
+                fill!(result, not_in_domain_value)
+            else
+                evaluate_bary!(result, PE, xref, cell)
+                lastnonzerocell = cell
+            end
+            return nothing
+        end
+        fe_function = point_evaluation_arbitrarygrids!
+    end
+    return interpolate!(target, ON_CELLS, fe_function; resultdim = resultdim, items = items, kwargs...)
 end
