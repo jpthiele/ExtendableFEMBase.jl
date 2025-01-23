@@ -57,19 +57,40 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Iden
     return nothing
 end
 
+function apply_inverse_transform!(
+        L2GAinv::Matrix{Float64},
+        cvals::Array{Float64, 3},
+        refvals::Array{Float64, 3},
+        dof_i::Int64,
+        local_offset::Int64,
+        reference_offset::Int64
+    )
+    m = size(L2GAinv,2)
+	n = size(cvals,3)
+	k = size(refvals,2)
+	# Reshape both local basis values (cvals) 
+	# and reference basis values as matrices to apply L2GAinv
+	Y = reshape(view(cvals,(1:m) .+ local_offset, dof_i, :),m,n)
+	X = reshape(view(refvals,reference_offset, :, :),k,n)
+	
+	mul!(Y,L2GAinv,X,1.0,1.0)
+    return nothing
+end
+
 # GRADIENT H1
 function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Gradient, <:AbstractH1FiniteElement})
     L2GAinv = _update_trafo!(FEBE)
     subset = _update_subset!(FEBE)
-    cvals = FEBE.cvals
-    offsets = FEBE.offsets
-    offsets2 = FEBE.offsets2
-    refbasisderivvals = FEBE.refbasisderivvals
-    fill!(cvals, 0)
-    for i in 1:size(cvals, 3), c in 1:length(offsets), j in 1:size(L2GAinv, 1), k in 1:size(L2GAinv, 2), dof_i in 1:size(cvals, 2)
-        # compute duc/dxk
-        cvals[k + offsets[c], dof_i, i] += L2GAinv[k, j] * refbasisderivvals[subset[dof_i] + offsets2[c], j, i]
-    end
+    fill!(FEBE.cvals, 0)
+    for c in 1:length(FEBE.offsets), dof_i in 1:size(FEBE.cvals, 2)
+		apply_inverse_transform!(
+			L2GAinv,
+			FEBE.cvals,
+			FEBE.refbasisderivvals,
+			dof_i,
+			FEBE.offsets[c],
+			subset[dof_i]+FEBE.offsets2[c])
+	end
     return nothing
 end
 
