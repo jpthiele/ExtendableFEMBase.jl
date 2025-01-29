@@ -58,25 +58,24 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Iden
 end
 
 function apply_inverse_transform!(
-        L2GAinv::Matrix{Float64},
-        cvals::Array{Float64, 3},
-        refvals::Array{Float64, 3},
-        dof_i::Int64,
-        local_offset::Int64,
+        L2GAinv::Matrix{T1},
+        cvals::Array{T2, 3},
+        refvals::Array{T3, 3},
+        dof_i::Int,
+        compressiontargets,
         reference_offset::Int64,
-        coeff::Float64 = 1.0
-    )
+        coeff::T4 = 1.0
+    ) where {T1, T2, T3, T4}
     m = size(L2GAinv, 2)
     n = size(cvals, 3)
-    k = size(refvals, 2)
     # Reshape both local basis values (cvals)
     # and reference basis values as matrices to apply L2GAinv
-    Y = reshape(view(cvals, (1:m) .+ local_offset, dof_i, :), m, n)
-    X = reshape(view(refvals, reference_offset, :, :), k, n)
+    Y = reshape(view(cvals, compressiontargets, dof_i, :), m, n)
+    X = reshape(view(refvals, reference_offset, :, :), m, n)
+    # Y = coeff*L2GAinv*X + 1.0*Y
     mul!(Y, L2GAinv, X, coeff, 1.0)
     return nothing
 end
-
 # GRADIENT H1
 function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Gradient, <:AbstractH1FiniteElement})
     L2GAinv = _update_trafo!(FEBE)
@@ -88,7 +87,7 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Grad
             FEBE.cvals,
             FEBE.refbasisderivvals,
             dof_i,
-            FEBE.offsets[c],
+            (1:size(L2GAinv, 2)) .+ FEBE.offsets[c],
             subset[dof_i] + FEBE.offsets2[c]
         )
     end
@@ -107,7 +106,7 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Grad
             FEBE.cvals,
             FEBE.refbasisderivvals,
             dof_i,
-            FEBE.offsets[c],
+            (1:size(L2GAinv, 2)) .+ FEBE.offsets[c],
             subset[dof_i] + FEBE.offsets2[c],
             coefficients[c, dof_i]
         )
@@ -120,17 +119,23 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Symm
     L2GAinv = _update_trafo!(FEBE)
     subset = _update_subset!(FEBE)
     compression = FEBE.compressiontargets
-    cvals = FEBE.cvals
-    offsets = FEBE.offsets
-    offsets2 = FEBE.offsets2
-    refbasisderivvals = FEBE.refbasisderivvals
-    fill!(cvals, 0)
-    for i in 1:size(cvals, 3), dof_i in 1:size(cvals, 2), c in 1:length(offsets), k in 1:size(L2GAinv, 2), j in 1:size(L2GAinv, 1)
-        # compute duc/dxk and put it into the right spot in the Voigt vector
-        if k != c
-            cvals[compression[k + offsets[c]], dof_i, i] += offdiagval * L2GAinv[k, j] * refbasisderivvals[subset[dof_i] + offsets2[c], j, i]
-        else
-            cvals[compression[k + offsets[c]], dof_i, i] += L2GAinv[k, j] * refbasisderivvals[subset[dof_i] + offsets2[c], j, i]
+    fill!(FEBE.cvals, 0)
+    for dof_i in 1:size(FEBE.cvals, 2), c in 1:length(FEBE.offsets)
+        compressiontargets = view(compression, (1:size(L2GAinv, 2)) .+ FEBE.offsets[c])
+        apply_inverse_transform!(
+            L2GAinv,
+            FEBE.cvals,
+            FEBE.refbasisderivvals,
+            dof_i,
+            compressiontargets,
+            subset[dof_i] + FEBE.offsets2[c]
+        )
+    end
+    # Multiply off diagonal values by offdiagval
+    for c in 1:length(FEBE.offsets)
+        # Due to compression only the upper right diagonal has to be multiplied
+        for k in (c + 1):size(L2GAinv, 2)
+            view(FEBE.cvals, compression[k + FEBE.offsets[c]], :, :) .*= offdiagval
         end
     end
 
@@ -145,8 +150,8 @@ function update_basis!(FEBE::SingleFEEvaluator{<:Real, <:Real, <:Integer, <:Dive
     offsets2 = FEBE.offsets2
     refbasisderivvals = FEBE.refbasisderivvals
     fill!(cvals, 0)
-    for dof_i in 1:size(cvals, 2), j in 1:size(L2GAinv, 1)
-        for i in 1:size(cvals, 3), k in 1:size(L2GAinv, 2)
+    for dof_i in 1:size(cvals, 2)
+        for i in 1:size(cvals, 3), k in 1:size(L2GAinv, 2), j in 1:size(L2GAinv, 1)
             cvals[1, dof_i, i] += L2GAinv[k, j] * refbasisderivvals[subset[dof_i] + offsets2[k], j, i]
         end
     end
