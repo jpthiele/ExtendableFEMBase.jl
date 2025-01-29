@@ -33,6 +33,17 @@ function run_feevaluator_tests()
         @test FEBasis_∇_vec.cvals == [1.0 -1.0 0.0 0.0 0.0 0.0; 0.0 1.0 -1.0 0.0 0.0 0.0; 0.0 0.0 0.0 1.0 -1.0 0.0; 0.0 0.0 0.0 0.0 1.0 -1.0;;;]
         @test allocs == 0
 
+        @info "Vector valued H1P1 sym gradient"
+        FES_vec = FESpace{H1P1{2}}(xgrid)
+        FEBasis_sym∇ = FEEvaluator(FES_vec, SymmetricGradient{0.5}, qf)
+        FEBasis_sym∇.citem[] = 1
+        update_basis!(FEBasis_sym∇)
+        @test FEBasis_sym∇.cvals == [-1.0 1.0 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0 -1.0 1.0; 0.0 -0.5 0.5 -0.5 0.5 0.0;;;]
+        FEBasis_sym∇.citem[] = 2
+        allocs = @allocated update_basis!(FEBasis_sym∇)
+        @test FEBasis_sym∇.cvals == [1.0 -1.0 0.0 0.0 0.0 0.0; 0.0 0.0 0.0 0.0 1.0 -1.0; 0.0 0.5 -0.5 0.5 -0.5 0.0;;;]
+        @test allocs == 0
+
         @info "Vector valued H1P1 function divergence"
         FEBasis_div = FEEvaluator(FES_vec, Divergence, qf)
         FEBasis_div.citem[] = 1
@@ -42,6 +53,7 @@ function run_feevaluator_tests()
         allocs = @allocated update_basis!(FEBasis_div)
         @test FEBasis_div.cvals == [1.0 -1.0 0.0 0.0 1.0 -1.0;;;]
         @test allocs == 0
+
 
         @info "Vector valued H1BR function gradient"
         qf = QuadratureRule{Float64, EG}(3)
